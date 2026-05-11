@@ -10,6 +10,11 @@ def generate_insights(results):
                 f"La media de {column} es baja."
             )
 
+        if len(metrics["anomalies"]) > 0:
+            insights.append(
+                f"Se detectaron anomalías en {column}."
+            )
+
         insights.append(
             f"El valor máximo de {column} es {metrics['max']}."
         )
