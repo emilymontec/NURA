@@ -86,11 +86,30 @@ function addMessage(text, sender, id = null) {
 
     const msgDiv = document.createElement("div");
     msgDiv.className = `message ${sender}-msg`;
+    if (sender === "bot" && id && id.startsWith("typing")) {
+        msgDiv.classList.add("loading");
+    }
     if (id) {
         msgDiv.id = id;
     }
 
-    msgDiv.innerHTML = escapeHtml(text).replace(/\n/g, "<br>");
+    let avatarHtml = "";
+    if (sender === "bot") {
+        avatarHtml = `<div class="avatar nura-avatar">
+                        <span class="node-mini node-pink"></span>
+                        <span class="node-mini node-cyan"></span>
+                        <span class="node-mini node-blue"></span>
+                      </div>`;
+    } else {
+        avatarHtml = `<div class="avatar user-avatar">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                      </div>`;
+    }
+
+    const formattedText = escapeHtml(text).replace(/\n/g, "</p><p>");
+    const contentHtml = `<div class="msg-content"><p>${formattedText}</p></div>`;
+
+    msgDiv.innerHTML = avatarHtml + contentHtml;
     chatBox.appendChild(msgDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
@@ -105,15 +124,35 @@ function openFilePicker() {
 function clearAnalysis() {
     state.analysis = null;
 
-    document.getElementById("selected-file-label").textContent = "Sin archivo";
-    document.getElementById("stat-file").textContent = "Esperando carga";
-    document.getElementById("stat-rows").textContent = "0";
-    document.getElementById("stat-columns").textContent = "0";
-    document.getElementById("stat-risk").textContent = "Sin evaluar";
-    document.getElementById("stat-health-detail").textContent = "Salud de datos pendiente";
-    document.getElementById("upload-hint").textContent = "Formatos soportados: `.csv`, `.xlsx`, `.xls`";
-    document.getElementById("insights-list").innerHTML = "Carga un archivo para ver alertas, patrones y recomendaciones iniciales.";
-    document.getElementById("trends-table").innerHTML = "Aun no hay metricas disponibles para mostrar.";
+    const elSelectedFile = document.getElementById("selected-file-label");
+    if(elSelectedFile) elSelectedFile.textContent = "Sin archivo";
+    
+    const elStatFile = document.getElementById("stat-file");
+    if(elStatFile) elStatFile.textContent = "Esperando carga";
+    
+    const elStatRows = document.getElementById("stat-rows");
+    if(elStatRows) elStatRows.textContent = "0";
+    
+    const elStatColumns = document.getElementById("stat-columns");
+    if(elStatColumns) elStatColumns.textContent = "0";
+    
+    const elStatRisk = document.getElementById("stat-risk");
+    if(elStatRisk) elStatRisk.textContent = "Sin evaluar";
+    
+    const elStatHealth = document.getElementById("stat-health-detail");
+    if(elStatHealth) elStatHealth.textContent = "Salud de datos pendiente";
+    
+    const elUploadHint = document.getElementById("upload-hint");
+    if(elUploadHint) elUploadHint.textContent = "Formatos soportados: `.csv`, `.xlsx`, `.xls`";
+    
+    const elInsightsList = document.getElementById("insights-list");
+    if(elInsightsList) elInsightsList.innerHTML = "Carga un archivo para ver alertas, patrones y recomendaciones iniciales.";
+    
+    const elTrendsTable = document.getElementById("trends-table");
+    if(elTrendsTable) elTrendsTable.innerHTML = "Aun no hay metricas disponibles para mostrar.";
+
+    const insightsContainer = document.getElementById("insights-container");
+    if(insightsContainer) insightsContainer.style.display = "none";
 }
 
 function renderInsights(insights) {
@@ -175,13 +214,29 @@ function renderTrends(trends) {
 function renderAnalysis(data) {
     state.analysis = data;
 
-    document.getElementById("selected-file-label").textContent = data.file_name || "Archivo procesado";
-    document.getElementById("stat-file").textContent = data.file_name || "Archivo listo";
-    document.getElementById("stat-rows").textContent = formatNumber(data.summary?.rows);
-    document.getElementById("stat-columns").textContent = formatNumber(data.summary?.columns);
-    document.getElementById("stat-risk").textContent = getRiskLabel(data.health?.risk_level, data.health?.health_score);
-    document.getElementById("stat-health-detail").textContent = `Faltantes: ${formatNumber(data.summary?.total_missing)} · Duplicados: ${formatNumber(data.summary?.duplicate_rows)}`;
-    document.getElementById("upload-hint").textContent = "Analisis generado. Ya puedes preguntar al chat por riesgos, patrones o recomendaciones.";
+    const elSelectedFile = document.getElementById("selected-file-label");
+    if(elSelectedFile) elSelectedFile.textContent = data.file_name || "Archivo procesado";
+    
+    const elStatFile = document.getElementById("stat-file");
+    if(elStatFile) elStatFile.textContent = data.file_name || "Archivo listo";
+    
+    const elStatRows = document.getElementById("stat-rows");
+    if(elStatRows) elStatRows.textContent = formatNumber(data.summary?.rows);
+    
+    const elStatColumns = document.getElementById("stat-columns");
+    if(elStatColumns) elStatColumns.textContent = formatNumber(data.summary?.columns);
+    
+    const elStatRisk = document.getElementById("stat-risk");
+    if(elStatRisk) elStatRisk.textContent = getRiskLabel(data.health?.risk_level, data.health?.health_score);
+    
+    const elStatHealth = document.getElementById("stat-health-detail");
+    if(elStatHealth) elStatHealth.textContent = `Faltantes: ${formatNumber(data.summary?.total_missing)} · Duplicados: ${formatNumber(data.summary?.duplicate_rows)}`;
+    
+    const elUploadHint = document.getElementById("upload-hint");
+    if(elUploadHint) elUploadHint.textContent = "Analisis generado. Ya puedes preguntar al chat por riesgos, patrones o recomendaciones.";
+
+    const insightsContainer = document.getElementById("insights-container");
+    if(insightsContainer && data.insights?.length) insightsContainer.style.display = "block";
 
     renderInsights(data.insights);
     renderTrends(data.trends);
@@ -248,7 +303,11 @@ async function handleFileUpload(event) {
         return;
     }
 
-    document.getElementById("selected-file-label").textContent = file.name;
+    const elSelectedFile = document.getElementById("selected-file-label");
+    if (elSelectedFile) elSelectedFile.textContent = file.name;
+    const elStatFile = document.getElementById("stat-file");
+    if (elStatFile) elStatFile.textContent = file.name;
+    
     addMessage(`Archivo cargado: ${file.name}`, "user");
 
     const typingId = `typing-${Date.now()}`;

@@ -1,154 +1,100 @@
-<div class="app-shell">
-    <header class="topbar">
-        <div class="brand">
-            <div class="brand-mark" aria-hidden="true">
-                <span class="node node-pink"></span>
-                <span class="node node-cyan"></span>
-                <span class="node node-blue"></span>
-            </div>
-            <div class="brand-copy">
-                <strong>NURA</strong>
-                <span>INTELLIGENCE</span>
-            </div>
-        </div>
-
-        <div class="topbar-actions">
-            <div class="status-pill">
-                <span class="status-dot"></span>
-                <div>
-                    <strong id="api-status">Comprobando...</strong>
-                    <small id="api-status-detail">Validando conectividad del backend.</small>
+<div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">
+                    <span class="node node-pink"></span>
+                    <span class="node node-cyan"></span>
+                    <span class="node node-blue"></span>
+                </div>
+                <div class="brand-copy">
+                    <strong>NURA</strong>
+                    <span>INTELLIGENCE</span>
                 </div>
             </div>
-            <button class="btn btn-secondary" onclick="testAPI()">Verificar</button>
-        </div>
-    </header>
-
-    <section class="intro-panel">
-        <div class="intro-copy">
-            <span class="eyebrow">Analisis conversacional de datos</span>
-            <h1>Sube un archivo, revisa el contexto y conversa con una IA enfocada en decisiones empresariales.</h1>
-            <p>
-                Una interfaz mas simple para centralizar carga, lectura ejecutiva del dataset, indicadores clave
-                y preguntas en lenguaje natural sin perder contexto.
-            </p>
         </div>
 
-        <div class="intro-meta">
-            <div class="meta-block">
-                <span class="meta-label">Sesion</span>
-                <strong id="session-id-label">Inicializando...</strong>
-            </div>
-            <div class="meta-block">
-                <span class="meta-label">Archivo actual</span>
-                <strong id="selected-file-label">Sin archivo</strong>
-            </div>
-        </div>
-    </section>
-
-    <div class="workspace-grid">
-        <aside class="sidebar">
-            <section class="panel upload-panel">
-                <div class="panel-header">
-                    <div>
-                        <span class="panel-kicker">Carga</span>
-                        <h2>Analisis de archivos</h2>
-                    </div>
-                </div>
-
-                <p class="panel-text">
-                    Importa un archivo empresarial y deja que NURA genere un resumen inicial del contexto.
-                </p>
-
+        <div class="sidebar-content">
+            <div class="upload-section">
+                <button class="btn-new-chat" onclick="openFilePicker()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span>Nuevo Analisis</span>
+                </button>
                 <input type="file" id="data-upload" accept=".csv,.xlsx,.xls" hidden onchange="handleFileUpload(event)">
+            </div>
 
-                <div class="upload-actions">
-                    <button class="btn btn-primary" onclick="openFilePicker()">Seleccionar archivo</button>
-                    <button class="btn btn-ghost" onclick="clearAnalysis()">Limpiar</button>
-                </div>
-
-                <div class="upload-hint" id="upload-hint">Formatos soportados: `.csv`, `.xlsx`, `.xls`</div>
-            </section>
-
-            <section class="panel metrics-panel">
-                <div class="panel-header">
-                    <div>
-                        <span class="panel-kicker">Resumen</span>
-                        <h2>Contexto del dataset</h2>
+            <div class="context-section">
+                <span class="section-title">Contexto del Dataset</span>
+                <div class="context-card">
+                    <div class="meta-row">
+                        <span class="meta-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                        </span>
+                        <strong id="stat-file" class="truncate" title="Esperando carga">Sin archivo</strong>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                        </span>
+                        <span class="meta-label">Registros:</span>
+                        <strong id="stat-rows">0</strong>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                        </span>
+                        <span class="meta-label">Variables:</span>
+                        <strong id="stat-columns">0</strong>
                     </div>
                 </div>
-
-                <div class="metrics-list">
-                    <article class="metric-row">
-                        <span class="metric-label">Archivo</span>
-                        <strong class="metric-value compact" id="stat-file">Esperando carga</strong>
-                    </article>
-                    <article class="metric-row">
-                        <span class="metric-label">Registros</span>
-                        <strong class="metric-value" id="stat-rows">0</strong>
-                    </article>
-                    <article class="metric-row">
-                        <span class="metric-label">Variables</span>
-                        <strong class="metric-value" id="stat-columns">0</strong>
-                    </article>
-                    <article class="metric-row">
-                        <span class="metric-label">Riesgo</span>
-                        <strong class="metric-value compact" id="stat-risk">Sin evaluar</strong>
-                    </article>
+            </div>
+            
+            <div class="insights-section" style="display: none;" id="insights-container">
+                <span class="section-title">Insights Rápidos</span>
+                <div class="insights-list" id="insights-list">
+                    <!-- Insights will populate here -->
                 </div>
+            </div>
+        </div>
 
-                <div class="metric-note" id="stat-health-detail">Salud de datos pendiente</div>
-            </section>
-        </aside>
+        <div class="sidebar-footer">
+            <div class="status-indicator" onclick="testAPI()" style="cursor: pointer;" title="Haz clic para re-verificar">
+                <span class="status-dot"></span>
+                <span id="api-status">Conectado</span>
+            </div>
+        </div>
+    </aside>
 
-        <section class="content-column">
-            <section class="panel analysis-panel">
-                <div class="panel-header">
-                    <div>
-                        <span class="panel-kicker">Lectura rapida</span>
-                        <h2>Insights y tendencias</h2>
-                    </div>
+    <!-- Main Chat Area -->
+    <main class="chat-main">
+        <div class="chat-container" id="chat-box">
+            <div class="message bot-msg intro-animation">
+                <div class="avatar nura-avatar">
+                    <span class="node-mini node-pink"></span>
+                    <span class="node-mini node-cyan"></span>
+                    <span class="node-mini node-blue"></span>
                 </div>
-
-                <div class="analysis-grid">
-                    <div class="analysis-block">
-                        <h3>Hallazgos clave</h3>
-                        <div class="empty-state" id="insights-list">
-                            Carga un archivo para ver alertas, patrones y recomendaciones iniciales.
-                        </div>
-                    </div>
-
-                    <div class="analysis-block">
-                        <h3>Indicadores numericos</h3>
-                        <div class="empty-state" id="trends-table">
-                            Aun no hay metricas disponibles para mostrar.
-                        </div>
-                    </div>
+                <div class="msg-content">
+                    <p>Hola. Soy <strong>NURA Intelligence</strong>.</p>
+                    <p>Sube un archivo de datos empresariales para analizar tendencias, riesgos o generar un resumen inicial de tu información.</p>
                 </div>
-            </section>
+            </div>
+        </div>
 
-            <section class="panel chat-panel">
-                <div class="panel-header">
-                    <div>
-                        <span class="panel-kicker">Conversacion</span>
-                        <h2>Chat IA</h2>
-                    </div>
-                    <span class="chat-chip">Contexto activo</span>
-                </div>
-
-                <div class="chat-box" id="chat-box">
-                    <div class="message bot-msg">
-                        <strong>NURA esta lista.</strong><br>
-                        Sube un archivo para generar contexto y luego pregunta por riesgos, tendencias o recomendaciones.
-                    </div>
-                </div>
-
-                <div class="composer">
-                    <button class="icon-btn" onclick="openFilePicker()" title="Adjuntar archivo">+</button>
-                    <input type="text" id="user-input" placeholder="Escribe una pregunta sobre el dataset..." onkeypress="handleKeyPress(event)">
-                    <button class="btn btn-primary" id="send-button" onclick="sendMessage()">Enviar</button>
-                </div>
-            </section>
-        </section>
-    </div>
+        <div class="composer-container">
+            <div class="composer-box">
+                <button class="attach-btn" onclick="openFilePicker()" title="Adjuntar archivo">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                </button>
+                <textarea id="user-input" placeholder="Pregunta a NURA sobre tu dataset..." onkeypress="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }" rows="1"></textarea>
+                <button class="send-btn" id="send-button" onclick="sendMessage()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+            <div class="composer-footer">
+                NURA puede generar información inexacta. Verifica los datos importantes.
+            </div>
+        </div>
+    </main>
 </div>
