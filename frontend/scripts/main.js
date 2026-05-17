@@ -18,7 +18,7 @@ function getSessionId() {
 }
 
 function escapeHtml(text) {
-    return text
+    return String(text)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
@@ -40,6 +40,64 @@ function formatDecimal(value) {
     return Number(value).toFixed(2);
 }
 
+function setText(id, value, title = null) {
+    const element = document.getElementById(id);
+    if (!element) {
+        return;
+    }
+
+    element.textContent = value;
+    if (title !== null) {
+        element.title = title;
+    }
+}
+
+function setExecutiveSummary(title, detail) {
+    setText("executive-summary-copy", title, title);
+    setText("executive-summary-detail", detail, detail);
+}
+
+function getRiskTone(riskLevel) {
+    const level = String(riskLevel || "").toLowerCase();
+    if (level.includes("alto")) {
+        return "high";
+    }
+    if (level.includes("medio")) {
+        return "medium";
+    }
+    if (level.includes("bajo")) {
+        return "low";
+    }
+    return "neutral";
+}
+
+function setRiskValue(id, text, riskLevel) {
+    const element = document.getElementById(id);
+    if (!element) {
+        return;
+    }
+
+    element.textContent = text;
+    element.dataset.tone = getRiskTone(riskLevel);
+}
+
+function setDatasetState(label, variant = "neutral") {
+    const badge = document.getElementById("dataset-state-badge");
+    if (!badge) {
+        return;
+    }
+
+    badge.textContent = label;
+    badge.className = `mini-badge ${variant}`;
+}
+
+function updateHeroSummary({ file = "Sin archivo", rows = "0", risk = "Sin evaluar", health = "Salud de datos pendiente.", riskLevel = "" } = {}) {
+    setText("hero-file", file, file);
+    setText("hero-rows", rows);
+    setRiskValue("hero-risk", risk, riskLevel);
+    setText("hero-health", health);
+}
+
 function getRiskLabel(riskLevel, score) {
     if (!riskLevel) {
         return "Sin evaluar";
@@ -56,15 +114,16 @@ function getBotAvatarMarkup() {
 function setApiStatus(text, detail, status) {
     const statusEl = document.getElementById("api-status");
     const detailEl = document.getElementById("api-status-detail");
-    const indicatorEl = statusEl ? statusEl.closest(".status-indicator") : null;
-    if (!statusEl || !detailEl || !indicatorEl) {
+    const statusCardEl = statusEl ? statusEl.closest(".status-card") : null;
+    if (!statusEl || !detailEl || !statusCardEl) {
         return;
     }
 
     statusEl.textContent = text;
     detailEl.textContent = detail;
     statusEl.dataset.state = status;
-    indicatorEl.classList.toggle("status-error", status === "error");
+    statusCardEl.classList.toggle("status-error", status === "error");
+    setText("hero-status-label", status === "error" ? "Backend sin conexion" : text === "Comprobando..." ? "Validando backend" : "Backend operativo");
 }
 
 function updateSessionLabel() {
@@ -72,6 +131,7 @@ function updateSessionLabel() {
     if (label) {
         label.textContent = state.sessionId;
     }
+    setText("hero-session", state.sessionId, state.sessionId);
 }
 
 async function testAPI() {
@@ -118,6 +178,17 @@ function addMessage(text, sender, id = null) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+function usePrompt(prompt) {
+    const input = document.getElementById("user-input");
+    if (!input) {
+        return;
+    }
+
+    input.value = prompt;
+    autoResizeInput();
+    input.focus();
+}
+
 function openFilePicker() {
     const input = document.getElementById("data-upload");
     if (input) {
@@ -128,38 +199,42 @@ function openFilePicker() {
 function clearAnalysis() {
     state.analysis = null;
 
-    const elSelectedFile = document.getElementById("selected-file-label");
-    if(elSelectedFile) elSelectedFile.textContent = "Sin archivo";
-    
-    const elStatFile = document.getElementById("stat-file");
-    if(elStatFile) elStatFile.textContent = "Esperando carga";
-    
-    const elStatRows = document.getElementById("stat-rows");
-    if(elStatRows) elStatRows.textContent = "0";
-    
-    const elStatColumns = document.getElementById("stat-columns");
-    if(elStatColumns) elStatColumns.textContent = "0";
-    
-    const elStatRisk = document.getElementById("stat-risk");
-    if(elStatRisk) elStatRisk.textContent = "Sin evaluar";
-    
-    const elStatHealth = document.getElementById("stat-health-detail");
-    if(elStatHealth) elStatHealth.textContent = "Salud de datos pendiente";
-    
+    setText("selected-file-label", "Sin archivo", "Sin archivo");
+    setText("stat-file", "Esperando carga", "Esperando carga");
+    setText("stat-rows", "0");
+    setText("stat-columns", "0");
+    setRiskValue("stat-risk", "Sin evaluar", "");
+    setText("stat-health-detail", "Salud de datos pendiente");
+    setText("hero-columns", "0");
+    setText("hero-state", "Sin carga");
+    setText("hero-flow", "Listo para analizar");
+    updateHeroSummary();
+    setDatasetState("Sin carga", "neutral");
+    setExecutiveSummary(
+        "Carga un archivo para activar el resumen automatico del contexto analitico.",
+        "NURA mostrara salud del dato, volumen y señales tempranas para acelerar la evaluacion."
+    );
+
     const elUploadHint = document.getElementById("upload-hint");
-    if(elUploadHint) elUploadHint.textContent = "Formatos soportados: `.csv`, `.xlsx`, `.xls`";
-    
+    if (elUploadHint) {
+        elUploadHint.innerHTML = "Formatos soportados: <code>.csv</code>, <code>.xlsx</code>, <code>.xls</code>";
+    }
+
     const elInsightsList = document.getElementById("insights-list");
-    if(elInsightsList) elInsightsList.innerHTML = "Carga un archivo para ver alertas, patrones y recomendaciones iniciales.";
-    
+    if (elInsightsList) {
+        elInsightsList.innerHTML = "Carga un archivo para ver alertas, patrones y recomendaciones iniciales.";
+    }
+
     const elTrendsTable = document.getElementById("trends-table");
-    if(elTrendsTable) {
+    if (elTrendsTable) {
         elTrendsTable.classList.remove("has-table");
         elTrendsTable.innerHTML = "Aun no hay metricas disponibles para mostrar.";
     }
 
     const insightsContainer = document.getElementById("insights-container");
-    if(insightsContainer) insightsContainer.style.display = "none";
+    if (insightsContainer) {
+        insightsContainer.style.display = "none";
+    }
 }
 
 function renderInsights(insights) {
@@ -235,29 +310,43 @@ function autoResizeInput() {
 function renderAnalysis(data) {
     state.analysis = data;
 
-    const elSelectedFile = document.getElementById("selected-file-label");
-    if(elSelectedFile) elSelectedFile.textContent = data.file_name || "Archivo procesado";
-    
-    const elStatFile = document.getElementById("stat-file");
-    if(elStatFile) elStatFile.textContent = data.file_name || "Archivo listo";
-    
-    const elStatRows = document.getElementById("stat-rows");
-    if(elStatRows) elStatRows.textContent = formatNumber(data.summary?.rows);
-    
-    const elStatColumns = document.getElementById("stat-columns");
-    if(elStatColumns) elStatColumns.textContent = formatNumber(data.summary?.columns);
-    
-    const elStatRisk = document.getElementById("stat-risk");
-    if(elStatRisk) elStatRisk.textContent = getRiskLabel(data.health?.risk_level, data.health?.health_score);
-    
-    const elStatHealth = document.getElementById("stat-health-detail");
-    if(elStatHealth) elStatHealth.textContent = `Faltantes: ${formatNumber(data.summary?.total_missing)} · Duplicados: ${formatNumber(data.summary?.duplicate_rows)}`;
-    
+    const fileName = data.file_name || "Archivo procesado";
+    const rowCount = formatNumber(data.summary?.rows);
+    const columnCount = formatNumber(data.summary?.columns);
+    const riskLabel = getRiskLabel(data.health?.risk_level, data.health?.health_score);
+    const healthSummary = `Faltantes: ${formatNumber(data.summary?.total_missing)} · Duplicados: ${formatNumber(data.summary?.duplicate_rows)}`;
+
+    setText("selected-file-label", fileName, fileName);
+    setText("stat-file", fileName, fileName);
+    setText("stat-rows", rowCount);
+    setText("stat-columns", columnCount);
+    setRiskValue("stat-risk", riskLabel, data.health?.risk_level);
+    setText("stat-health-detail", healthSummary);
+    setText("hero-columns", columnCount);
+    setText("hero-state", "Dataset listo");
+    setText("hero-flow", "Analisis disponible");
+    updateHeroSummary({
+        file: fileName,
+        rows: rowCount,
+        risk: riskLabel,
+        health: healthSummary,
+        riskLevel: data.health?.risk_level,
+    });
+    setDatasetState("Listo", "success");
+    setExecutiveSummary(
+        `${fileName} procesado con ${rowCount} registros y ${columnCount} variables.`,
+        `Riesgo ${data.health?.risk_level || "no disponible"} con salud ${formatDecimal(data.health?.health_score)}. Usa el chat para profundizar en hallazgos y acciones.`
+    );
+
     const elUploadHint = document.getElementById("upload-hint");
-    if(elUploadHint) elUploadHint.textContent = "Analisis generado. Ya puedes preguntar al chat por riesgos, patrones o recomendaciones.";
+    if (elUploadHint) {
+        elUploadHint.textContent = "Analisis generado. Ya puedes preguntar al chat por riesgos, patrones o recomendaciones.";
+    }
 
     const insightsContainer = document.getElementById("insights-container");
-    if(insightsContainer && data.insights?.length) insightsContainer.style.display = "block";
+    if (insightsContainer && data.insights?.length) {
+        insightsContainer.style.display = "block";
+    }
 
     renderInsights(data.insights);
     renderTrends(data.trends);
@@ -325,10 +414,23 @@ async function handleFileUpload(event) {
         return;
     }
 
-    const elSelectedFile = document.getElementById("selected-file-label");
-    if (elSelectedFile) elSelectedFile.textContent = file.name;
-    const elStatFile = document.getElementById("stat-file");
-    if (elStatFile) elStatFile.textContent = file.name;
+    setText("selected-file-label", file.name, file.name);
+    setText("stat-file", file.name, file.name);
+    setText("hero-columns", "Calculando");
+    setText("hero-state", "Procesando");
+    setText("hero-flow", "Extrayendo señales");
+    updateHeroSummary({
+        file: file.name,
+        rows: "Procesando",
+        risk: "En calculo",
+        health: "Estamos evaluando calidad, faltantes y tendencias.",
+        riskLevel: "",
+    });
+    setDatasetState("Procesando", "neutral");
+    setExecutiveSummary(
+        `Procesando ${file.name}.`,
+        "Se estan evaluando volumen, estructura, calidad del dato y tendencias numericas."
+    );
     
     addMessage(`Archivo cargado: ${file.name}`, "user");
 
@@ -396,3 +498,4 @@ window.handleFileUpload = handleFileUpload;
 window.openFilePicker = openFilePicker;
 window.clearAnalysis = clearAnalysis;
 window.initializeDashboard = initializeDashboard;
+window.usePrompt = usePrompt;

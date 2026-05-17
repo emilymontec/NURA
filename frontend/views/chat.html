@@ -1,23 +1,27 @@
 <div class="app-shell">
     <div class="bg-orb orb-one" aria-hidden="true"></div>
+    <div class="bg-orb orb-two" aria-hidden="true"></div>
     <div class="bg-grid" aria-hidden="true"></div>
 
     <div class="app-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="brand">
-                    <img src="assets/logo.png" alt="Logo de NURA" class="brand-logo">
-                    <div class="brand-copy">
-                        <strong>NURA</strong>
-                        <span>Inteligencia</span>
+                <div class="brand-row">
+                    <div class="brand">
+                        <img src="assets/logo.png" alt="Logo de NURA" class="brand-logo">
+                        <div class="brand-copy">
+                            <strong>NURA</strong>
+                            <span>Inteligencia aplicada</span>
+                        </div>
                     </div>
+                    <span class="brand-badge">AI Ops</span>
                 </div>
-                <p class="sidebar-tagline">Analitica conversacional para transformar datos empresariales en decisiones claras.</p>
+                <p class="sidebar-tagline">Analitica conversacional para convertir datos empresariales en decisiones ejecutivas con mas claridad.</p>
             </div>
 
             <div class="sidebar-content">
-                <section class="sidebar-actions">
-                    <span class="section-title">Inicio</span>
+                <section class="sidebar-actions panel-block">
+                    <span class="section-title">Centro de carga</span>
                     <button class="btn-new-chat" onclick="openFilePicker()">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                         <span>Subir dataset</span>
@@ -26,15 +30,18 @@
                     <p id="upload-hint" class="panel-note">Formatos soportados: <code>.csv</code>, <code>.xlsx</code>, <code>.xls</code></p>
                 </section>
 
-                <section class="summary-section">
-                    <span class="section-title">Dataset</span>
+                <section class="summary-section panel-block">
+                    <div class="section-heading">
+                        <span class="section-title">Dataset activo</span>
+                        <span id="dataset-state-badge" class="mini-badge neutral">Sin carga</span>
+                    </div>
                     <div class="summary-file">
-                        <span>Activo</span>
+                        <span>Archivo</span>
                         <strong id="selected-file-label" class="truncate" title="Sin archivo">Sin archivo</strong>
                     </div>
                     <div class="summary-list">
                         <div class="summary-row">
-                            <span>Archivo</span>
+                            <span>Fuente</span>
                             <strong id="stat-file" class="truncate" title="Esperando carga">Esperando carga</strong>
                         </div>
                         <div class="summary-row">
@@ -53,18 +60,23 @@
                     <p id="stat-health-detail" class="summary-health">Salud de datos pendiente</p>
                 </section>
 
-                <section class="insights-section" id="insights-container" style="display: none;">
-                    <span class="section-title">Insights rapidos</span>
+                <section class="insights-section panel-block" id="insights-container" style="display: none;">
+                    <div class="section-heading">
+                        <span class="section-title">Insights rapidos</span>
+                        <span class="mini-badge">Auto</span>
+                    </div>
                     <div class="insights-list" id="insights-list"></div>
                 </section>
             </div>
 
             <div class="sidebar-footer">
-                <button class="status-indicator" onclick="testAPI()" title="Haz clic para re-verificar">
-                    <span class="status-dot"></span>
-                    <span id="api-status">Conectado</span>
-                </button>
-                <p id="api-status-detail">Backend operativo.</p>
+                <div class="status-card">
+                    <button class="status-indicator" onclick="testAPI()" title="Haz clic para re-verificar">
+                        <span class="status-dot"></span>
+                        <span id="api-status">Conectado</span>
+                    </button>
+                    <p id="api-status-detail">Backend operativo.</p>
+                </div>
                 <div class="sidebar-meta">
                     <span>Sesion</span>
                     <strong id="session-id-label" class="session-inline">Cargando...</strong>
@@ -74,21 +86,157 @@
 
         <main class="chat-main">
             <header class="workspace-header">
-                <span class="eyebrow">NURA</span>
-                <h1>Analiza tus datos con una experiencia mas limpia.</h1>
-                <p>Sube un dataset y conversa con una interfaz reducida, clara y enfocada en la lectura de resultados.</p>
-                <div id="trends-table" class="trends-placeholder">Aun no hay metricas disponibles para mostrar.</div>
+                <div class="workspace-topline">
+                    <div class="topline-left">
+                        <span class="eyebrow">NURA Intelligence</span>
+                        <span class="hero-ticker">Workspace analitico de nivel ejecutivo</span>
+                    </div>
+                    <div class="live-pill">
+                        <span class="live-dot"></span>
+                        <span>Analisis asistido en tiempo real</span>
+                    </div>
+                </div>
+
+                <div class="hero-grid">
+                    <div class="hero-copy">
+                        <div class="hero-copy-top">
+                            <span class="hero-kicker">Decision intelligence</span>
+                            <span class="hero-outline">Experiencia refinada para exploracion de datos, alertas y accion</span>
+                        </div>
+                        <h1>Convierte tus datasets en insights listos para exponer con una interfaz mas profesional.</h1>
+                        <p>Integra carga, salud del dato, tendencias y conversacion asistida en un panel visual limpio, con mejor jerarquia, foco en lectura y una experiencia pensada para contexto empresarial.</p>
+                        <div class="hero-actions">
+                            <button class="ghost-action primary" onclick="openFilePicker()">Cargar archivo</button>
+                            <button class="ghost-action" onclick="usePrompt('Genera un resumen ejecutivo del dataset cargado.')">Resumen ejecutivo</button>
+                        </div>
+                        <div class="hero-trustbar">
+                            <article class="trust-item">
+                                <span>Monitoreo</span>
+                                <strong id="hero-status-label">Backend operativo</strong>
+                                <small>Conectividad y disponibilidad del flujo analitico.</small>
+                            </article>
+                            <article class="trust-item">
+                                <span>Sesion activa</span>
+                                <strong id="hero-session" class="truncate" title="Cargando...">Cargando...</strong>
+                                <small>Persistencia local para mantener el contexto conversacional.</small>
+                            </article>
+                            <article class="trust-item">
+                                <span>Estado</span>
+                                <strong id="hero-state">Sin carga</strong>
+                                <small>Indicador rapido del avance actual del dataset.</small>
+                            </article>
+                        </div>
+                    </div>
+
+                    <div class="hero-metrics">
+                        <article class="hero-stat-card hero-stat-card-featured">
+                            <span>Dataset activo</span>
+                            <strong id="hero-file" class="truncate" title="Sin archivo">Sin archivo</strong>
+                            <small>Activo para preguntas, resumenes y recomendaciones ejecutivas.</small>
+                        </article>
+                        <div class="hero-mini-grid">
+                            <article class="hero-stat-card compact">
+                                <span>Registros</span>
+                                <strong id="hero-rows">0</strong>
+                                <small>Volumen disponible.</small>
+                            </article>
+                            <article class="hero-stat-card compact">
+                                <span>Variables</span>
+                                <strong id="hero-columns">0</strong>
+                                <small>Columnas detectadas.</small>
+                            </article>
+                            <article class="hero-stat-card compact">
+                                <span>Nivel de riesgo</span>
+                                <strong id="hero-risk">Sin evaluar</strong>
+                                <small id="hero-health">Salud de datos pendiente.</small>
+                            </article>
+                            <article class="hero-stat-card compact">
+                                <span>Estado del flujo</span>
+                                <strong id="hero-flow">Listo para analizar</strong>
+                                <small>Sube un archivo o inicia una consulta.</small>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="workspace-panels">
+                    <section class="panel-card executive-panel">
+                        <div class="panel-header">
+                            <div>
+                                <span class="section-title">Vista ejecutiva</span>
+                                <h2>Resumen del workspace</h2>
+                            </div>
+                            <span class="mini-badge">Overview</span>
+                        </div>
+                        <div class="executive-grid">
+                            <article class="executive-card">
+                                <span>Analitica centralizada</span>
+                                <strong>Todo el flujo en una sola vista</strong>
+                                <p>La nueva composicion mejora legibilidad, separacion de bloques y prioridad de la informacion.</p>
+                            </article>
+                            <article class="executive-card">
+                                <span>Interaccion guiada</span>
+                                <strong>Prompts y acciones siempre visibles</strong>
+                                <p>El usuario mantiene acceso rapido a preguntas frecuentes y al estado del analisis.</p>
+                            </article>
+                            <article class="executive-card">
+                                <span>Señales del dataset</span>
+                                <strong id="executive-summary-copy">Carga un archivo para activar el resumen automatico del contexto analitico.</strong>
+                                <p id="executive-summary-detail">NURA mostrara salud del dato, volumen y señales tempranas para acelerar la evaluacion.</p>
+                            </article>
+                        </div>
+                    </section>
+
+                    <section class="panel-card trends-panel">
+                        <div class="panel-header">
+                            <div>
+                                <span class="section-title">Tendencias clave</span>
+                                <h2>Indicadores numericos</h2>
+                            </div>
+                            <span class="mini-badge">Live view</span>
+                        </div>
+                        <div id="trends-table" class="trends-placeholder">Aun no hay metricas disponibles para mostrar.</div>
+                    </section>
+
+                    <section class="panel-card prompts-panel">
+                        <div class="panel-header">
+                            <div>
+                                <span class="section-title">Accesos rapidos</span>
+                                <h2>Prompts sugeridos</h2>
+                            </div>
+                            <span class="mini-badge">Workflow</span>
+                        </div>
+                        <div class="prompt-grid">
+                            <button class="prompt-chip" onclick="usePrompt('Resume el dataset cargado en lenguaje ejecutivo.')">Resumen ejecutivo</button>
+                            <button class="prompt-chip" onclick="usePrompt('Detecta riesgos, anomalias y variables criticas.')">Riesgos y alertas</button>
+                            <button class="prompt-chip" onclick="usePrompt('Explica las tendencias mas relevantes y sus implicaciones.')">Tendencias clave</button>
+                            <button class="prompt-chip" onclick="usePrompt('Propone acciones recomendadas segun este analisis.')">Recomendaciones</button>
+                        </div>
+                        <div class="prompt-footer-note">
+                            <span class="prompt-footer-label">Sugerencia</span>
+                            <p>Combina un resumen ejecutivo con un pedido de riesgos para obtener una lectura mas completa del dataset.</p>
+                        </div>
+                    </section>
+                </div>
             </header>
 
             <section class="chat-stage">
+                <div class="chat-stage-header">
+                    <div>
+                        <span class="section-title">Conversacion</span>
+                        <h2>Asistente analitico</h2>
+                    </div>
+                    <p>Consulta hallazgos, riesgos, patrones y siguientes pasos sobre tu dataset con una interfaz mas clara y orientada a toma de decisiones.</p>
+                </div>
+
                 <div class="chat-container" id="chat-box">
                     <div class="message bot-msg intro-animation">
                         <div class="avatar nura-avatar">
                             <img src="assets/logo.png" alt="NURA" class="avatar-logo">
                         </div>
-                        <div class="msg-content">
+                        <div class="msg-content intro-card">
                             <p>Hola. Soy <strong>NURA Inteligencia</strong>.</p>
-                            <p>Sube un archivo de datos empresariales para analizar tendencias, riesgos y recomendaciones con una vista ejecutiva y profesional.</p>
+                            <p>Estoy preparado para analizar datasets empresariales, resumir hallazgos y traducirlos en recomendaciones accionables con una experiencia mas limpia y profesional.</p>
                         </div>
                     </div>
                 </div>
@@ -105,7 +253,8 @@
                     </button>
                 </div>
                 <div class="composer-footer">
-                    NURA puede generar informacion inexacta. Verifica los datos importantes antes de tomar decisiones.
+                    <span>Enter para enviar. Shift + Enter para nueva linea.</span>
+                    <span>NURA puede generar informacion inexacta. Verifica los datos importantes antes de tomar decisiones.</span>
                 </div>
             </div>
         </main>
