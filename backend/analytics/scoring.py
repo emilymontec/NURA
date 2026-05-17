@@ -24,10 +24,10 @@ def risk_level(score: float) -> str:
     """Return a risk category based on health score.
     """
     if score >= 80:
-        return "low"
+        return "bajo"
     if score >= 50:
-        return "moderate"
-    return "high"
+        return "moderado"
+    return "alto"
 
 def evaluate_business(df_summary: Dict) -> Dict:
     """Convenient wrapper returning health score and risk level.

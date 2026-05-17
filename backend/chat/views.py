@@ -11,7 +11,7 @@ def index(request):
 
 def test_endpoint(request):
     """Health check endpoint."""
-    return JsonResponse({"status": "ok", "message": "NURA API is running"})
+    return JsonResponse({"status": "ok", "message": "La API de NURA esta operativa"})
 
 from analytics.analyzer import load_csv, dataset_summary, column_info
 from analytics.scoring import evaluate_business
@@ -27,7 +27,7 @@ def analyze_endpoint(request):
     """Endpoint to trigger dataset analysis."""
     if request.method == "POST":
         if 'file' not in request.FILES:
-            return JsonResponse({"error": "No file uploaded"}, status=400)
+            return JsonResponse({"error": "No se ha subido ningun archivo"}, status=400)
             
         file = request.FILES['file']
         session_id = request.POST.get('session_id', 'default')
@@ -53,9 +53,9 @@ def analyze_endpoint(request):
             
             return JsonResponse(safe_context)
         except Exception as e:
-            return JsonResponse({"error": f"Error analyzing file: {str(e)}"}, status=500)
+            return JsonResponse({"error": f"Error al analizar el archivo: {str(e)}"}, status=500)
             
-    return JsonResponse({"error": "POST method required"}, status=400)
+    return JsonResponse({"error": "Se requiere una peticion POST"}, status=400)
 
 @csrf_exempt
 def chat_endpoint(request):
@@ -69,7 +69,7 @@ def chat_endpoint(request):
             history = memory.get_history(session_id)
             
             # Use the actual context from the session if available
-            context = session_contexts.get(session_id, {"message": "No dataset uploaded yet."})
+            context = session_contexts.get(session_id, {"message": "Todavia no se ha cargado ningun dataset."})
             
             # This calls the Groq API
             response = chat_with_data(message, context, history)
@@ -80,4 +80,4 @@ def chat_endpoint(request):
             return JsonResponse({"response": response})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
-    return JsonResponse({"error": "POST method required"}, status=400)
+    return JsonResponse({"error": "Se requiere una peticion POST"}, status=400)

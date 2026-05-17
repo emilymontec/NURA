@@ -17,7 +17,7 @@ def load_csv(file_obj) -> pd.DataFrame:
     }
     reader = readers.get(file_type)
     if not reader:
-        raise ValueError("Unsupported file type. Please upload a CSV or Excel file.")
+        raise ValueError("Tipo de archivo no soportado. Sube un archivo CSV o Excel.")
     return reader(file_obj)
 
 def column_info(df: pd.DataFrame) -> Dict[str, Any]:

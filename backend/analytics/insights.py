@@ -7,31 +7,29 @@ def generate_insights(summary: Dict[str, Any], trends: Dict[str, Any], health: D
     
     # Check health
     score = health.get("health_score", 0)
-    risk = health.get("risk_level", "high")
-    
     if score < 50:
-        insights.append(f"Critical Data Health: The dataset has a low health score ({score}). Please check for missing values and duplicates.")
+        insights.append(f"Salud critica de datos: el dataset tiene una puntuacion baja ({score}). Revisa faltantes y duplicados.")
     elif score >= 80:
-        insights.append("Excellent Data Health: The dataset is clean and well-structured.")
+        insights.append("Salud excelente de datos: el dataset se ve limpio y bien estructurado.")
         
     # Check summary
     missing = summary.get("total_missing", 0)
     if missing > 0:
-        insights.append(f"Missing Data: Detected {missing} missing values across the dataset.")
+        insights.append(f"Datos faltantes: se detectaron {missing} valores ausentes en el dataset.")
         
     dupes = summary.get("duplicate_rows", 0)
     if dupes > 0:
-        insights.append(f"Duplicate Records: Found {dupes} duplicate rows that may affect analysis.")
+        insights.append(f"Registros duplicados: se encontraron {dupes} filas duplicadas que pueden afectar el analisis.")
         
     # Check trends
     for col, trend_data in trends.items():
         trend_val = trend_data.get("trend", 0)
         if trend_val > 0:
-            insights.append(f"Positive Trend in {col}: The data shows an upward trajectory (slope: {trend_val:.2f}).")
+            insights.append(f"Tendencia positiva en {col}: los datos muestran una trayectoria ascendente (pendiente: {trend_val:.2f}).")
         elif trend_val < 0:
-            insights.append(f"Negative Trend in {col}: The data shows a downward trajectory (slope: {trend_val:.2f}).")
+            insights.append(f"Tendencia negativa en {col}: los datos muestran una trayectoria descendente (pendiente: {trend_val:.2f}).")
             
     if not insights:
-        insights.append("No significant immediate insights detected. The data appears stable.")
+        insights.append("No se detectaron insights inmediatos relevantes. Los datos parecen estables.")
         
     return insights

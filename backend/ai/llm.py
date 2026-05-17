@@ -15,7 +15,7 @@ MODEL_NAME = "llama-3.3-70b-versatile"
 def generate_ai_report(context_data: dict) -> str:
     """Generate an executive report using Groq."""
     if not client:
-        return "Error: GROQ_API_KEY is not set."
+        return "Error: GROQ_API_KEY no esta configurada."
         
     prompt = EXECUTIVE_REPORT_PROMPT.format(
         summary=context_data.get('summary', {}),
@@ -27,7 +27,7 @@ def generate_ai_report(context_data: dict) -> str:
     try:
         response = client.chat.completions.create(
             messages=[
-                {"role": "system", "content": "You are a senior data analyst."},
+                {"role": "system", "content": "Eres una analista senior de datos y respondes siempre en espanol."},
                 {"role": "user", "content": prompt}
             ],
             model=MODEL_NAME,
@@ -35,12 +35,12 @@ def generate_ai_report(context_data: dict) -> str:
         )
         return response.choices[0].message.content
     except Exception as e:
-        return f"Error generating report: {str(e)}"
+        return f"Error al generar el reporte: {str(e)}"
 
 def chat_with_data(question: str, context: dict, history: str) -> str:
     """Answer user questions based on data context."""
     if not client:
-        return "Error: GROQ_API_KEY is not set."
+        return "Error: GROQ_API_KEY no esta configurada."
         
     prompt = CHAT_ANALYST_PROMPT.format(
         context=context,
@@ -51,7 +51,13 @@ def chat_with_data(question: str, context: dict, history: str) -> str:
     try:
         response = client.chat.completions.create(
             messages=[
-                {"role": "system", "content": "You are NURA, a helpful data analytics AI assistant."},
+                {
+                    "role": "system",
+                    "content": (
+                        "Eres NURA, una asistente de analitica de datos empresariales. "
+                        "Respondes siempre en espanol, con claridad, precision y tono profesional."
+                    ),
+                },
                 {"role": "user", "content": prompt}
             ],
             model=MODEL_NAME,
@@ -59,4 +65,4 @@ def chat_with_data(question: str, context: dict, history: str) -> str:
         )
         return response.choices[0].message.content
     except Exception as e:
-        return f"Error in chat: {str(e)}"
+        return f"Error en el chat: {str(e)}"
