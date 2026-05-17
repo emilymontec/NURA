@@ -1,100 +1,143 @@
-<div class="app-container">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="brand">
-                <div class="brand-mark" aria-hidden="true">
-                    <span class="node node-pink"></span>
-                    <span class="node node-cyan"></span>
-                    <span class="node node-blue"></span>
-                </div>
-                <div class="brand-copy">
-                    <strong>NURA</strong>
-                    <span>INTELLIGENCE</span>
-                </div>
-            </div>
-        </div>
+<div class="app-shell">
+    <div class="bg-orb orb-one" aria-hidden="true"></div>
+    <div class="bg-orb orb-two" aria-hidden="true"></div>
+    <div class="bg-grid" aria-hidden="true"></div>
 
-        <div class="sidebar-content">
-            <div class="upload-section">
-                <button class="btn-new-chat" onclick="openFilePicker()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    <span>Nuevo Analisis</span>
-                </button>
-                <input type="file" id="data-upload" accept=".csv,.xlsx,.xls" hidden onchange="handleFileUpload(event)">
-            </div>
-
-            <div class="context-section">
-                <span class="section-title">Contexto del Dataset</span>
-                <div class="context-card">
-                    <div class="meta-row">
-                        <span class="meta-icon">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
-                        </span>
-                        <strong id="stat-file" class="truncate" title="Esperando carga">Sin archivo</strong>
-                    </div>
-                    <div class="meta-row">
-                        <span class="meta-icon">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-                        </span>
-                        <span class="meta-label">Registros:</span>
-                        <strong id="stat-rows">0</strong>
-                    </div>
-                    <div class="meta-row">
-                        <span class="meta-icon">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-                        </span>
-                        <span class="meta-label">Variables:</span>
-                        <strong id="stat-columns">0</strong>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <img src="assets/logo.png" alt="Logo de NURA" class="brand-logo">
+                    <div class="brand-copy">
+                        <strong>NURA</strong>
+                        <span>Intelligence</span>
                     </div>
                 </div>
+                <p class="sidebar-tagline">Analitica conversacional para transformar datos empresariales en decisiones claras.</p>
             </div>
-            
-            <div class="insights-section" style="display: none;" id="insights-container">
-                <span class="section-title">Insights Rápidos</span>
-                <div class="insights-list" id="insights-list">
-                    <!-- Insights will populate here -->
+
+            <div class="sidebar-content">
+                <section class="panel upload-panel">
+                    <span class="section-title">Inicio rapido</span>
+                    <button class="btn-new-chat" onclick="openFilePicker()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span>Subir dataset</span>
+                    </button>
+                    <input type="file" id="data-upload" accept=".csv,.xlsx,.xls" hidden onchange="handleFileUpload(event)">
+                    <p id="upload-hint" class="panel-note">Formatos soportados: <code>.csv</code>, <code>.xlsx</code>, <code>.xls</code></p>
+                    <div class="active-file">
+                        <span>Archivo activo</span>
+                        <strong id="selected-file-label" class="truncate" title="Sin archivo">Sin archivo</strong>
+                    </div>
+                </section>
+
+                <section class="panel context-section">
+                    <span class="section-title">Contexto del dataset</span>
+                    <div class="context-card">
+                        <div class="meta-row meta-row-stack">
+                            <div>
+                                <span class="meta-label">Archivo</span>
+                                <strong id="stat-file" class="truncate" title="Esperando carga">Esperando carga</strong>
+                            </div>
+                            <span class="meta-icon meta-icon-soft">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                            </span>
+                        </div>
+
+                        <div class="stats-grid">
+                            <article class="stat-card">
+                                <span class="meta-label">Registros</span>
+                                <strong id="stat-rows">0</strong>
+                            </article>
+                            <article class="stat-card">
+                                <span class="meta-label">Variables</span>
+                                <strong id="stat-columns">0</strong>
+                            </article>
+                            <article class="stat-card stat-card-wide">
+                                <span class="meta-label">Riesgo</span>
+                                <strong id="stat-risk">Sin evaluar</strong>
+                            </article>
+                        </div>
+
+                        <div class="health-card">
+                            <span class="meta-label">Salud del dataset</span>
+                            <p id="stat-health-detail">Salud de datos pendiente</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel insights-section" id="insights-container" style="display: none;">
+                    <span class="section-title">Insights rapidos</span>
+                    <div class="insights-list" id="insights-list"></div>
+                </section>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="status-card">
+                    <button class="status-indicator" onclick="testAPI()" title="Haz clic para re-verificar">
+                        <span class="status-dot"></span>
+                        <span id="api-status">Conectado</span>
+                    </button>
+                    <p id="api-status-detail">Backend operativo.</p>
+                </div>
+
+                <div class="session-card">
+                    <span class="section-title">Sesion activa</span>
+                    <strong id="session-id-label">Cargando...</strong>
                 </div>
             </div>
-        </div>
+        </aside>
 
-        <div class="sidebar-footer">
-            <div class="status-indicator" onclick="testAPI()" style="cursor: pointer;" title="Haz clic para re-verificar">
-                <span class="status-dot"></span>
-                <span id="api-status">Conectado</span>
-            </div>
-        </div>
-    </aside>
-
-    <!-- Main Chat Area -->
-    <main class="chat-main">
-        <div class="chat-container" id="chat-box">
-            <div class="message bot-msg intro-animation">
-                <div class="avatar nura-avatar">
-                    <span class="node-mini node-pink"></span>
-                    <span class="node-mini node-cyan"></span>
-                    <span class="node-mini node-blue"></span>
+        <main class="chat-main">
+            <header class="workspace-header">
+                <div class="workspace-copy">
+                    <span class="eyebrow">Workspace</span>
+                    <h1>Analiza, conversa y descubre patrones con una experiencia mas clara.</h1>
+                    <p>NURA combina una interfaz limpia con analitica guiada para revisar riesgos, tendencias y contexto de negocio desde un mismo flujo.</p>
                 </div>
-                <div class="msg-content">
-                    <p>Hola. Soy <strong>NURA Intelligence</strong>.</p>
-                    <p>Sube un archivo de datos empresariales para analizar tendencias, riesgos o generar un resumen inicial de tu información.</p>
+
+                <div class="workspace-panels">
+                    <article class="workspace-panel">
+                        <span class="panel-badge">Enfoque</span>
+                        <h2>Minimalismo funcional</h2>
+                        <p>Jerarquia visual simple, superficies limpias y acentos tomados del logo para mantener coherencia de marca.</p>
+                    </article>
+
+                    <article class="workspace-panel workspace-panel-alt">
+                        <span class="panel-badge">Tendencias</span>
+                        <div id="trends-table" class="trends-placeholder">Aun no hay metricas disponibles para mostrar.</div>
+                    </article>
+                </div>
+            </header>
+
+            <section class="chat-stage">
+                <div class="chat-container" id="chat-box">
+                    <div class="message bot-msg intro-animation">
+                        <div class="avatar nura-avatar">
+                            <img src="assets/logo.png" alt="NURA" class="avatar-logo">
+                        </div>
+                        <div class="msg-content">
+                            <p>Hola. Soy <strong>NURA Intelligence</strong>.</p>
+                            <p>Sube un archivo de datos empresariales para analizar tendencias, riesgos y recomendaciones con una vista ejecutiva y profesional.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="composer-container">
+                <div class="composer-box">
+                    <button class="attach-btn" onclick="openFilePicker()" title="Adjuntar archivo">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                    </button>
+                    <textarea id="user-input" placeholder="Pregunta a NURA sobre tu dataset..." onkeypress="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }" rows="1"></textarea>
+                    <button class="send-btn" id="send-button" onclick="sendMessage()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+                <div class="composer-footer">
+                    NURA puede generar informacion inexacta. Verifica los datos importantes antes de tomar decisiones.
                 </div>
             </div>
-        </div>
-
-        <div class="composer-container">
-            <div class="composer-box">
-                <button class="attach-btn" onclick="openFilePicker()" title="Adjuntar archivo">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
-                </button>
-                <textarea id="user-input" placeholder="Pregunta a NURA sobre tu dataset..." onkeypress="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }" rows="1"></textarea>
-                <button class="send-btn" id="send-button" onclick="sendMessage()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                </button>
-            </div>
-            <div class="composer-footer">
-                NURA puede generar información inexacta. Verifica los datos importantes.
-            </div>
-        </div>
-    </main>
+        </main>
+    </div>
 </div>

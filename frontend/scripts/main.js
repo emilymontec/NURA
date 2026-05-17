@@ -47,16 +47,24 @@ function getRiskLabel(riskLevel, score) {
     return `${riskLevel.toUpperCase()} · ${formatDecimal(score)}`;
 }
 
+function getBotAvatarMarkup() {
+    return `<div class="avatar nura-avatar">
+                <img src="assets/logo.png" alt="NURA" class="avatar-logo">
+            </div>`;
+}
+
 function setApiStatus(text, detail, status) {
     const statusEl = document.getElementById("api-status");
     const detailEl = document.getElementById("api-status-detail");
-    if (!statusEl || !detailEl) {
+    const indicatorEl = statusEl ? statusEl.closest(".status-indicator") : null;
+    if (!statusEl || !detailEl || !indicatorEl) {
         return;
     }
 
     statusEl.textContent = text;
     detailEl.textContent = detail;
     statusEl.dataset.state = status;
+    indicatorEl.classList.toggle("status-error", status === "error");
 }
 
 function updateSessionLabel() {
@@ -95,11 +103,7 @@ function addMessage(text, sender, id = null) {
 
     let avatarHtml = "";
     if (sender === "bot") {
-        avatarHtml = `<div class="avatar nura-avatar">
-                        <span class="node-mini node-pink"></span>
-                        <span class="node-mini node-cyan"></span>
-                        <span class="node-mini node-blue"></span>
-                      </div>`;
+        avatarHtml = getBotAvatarMarkup();
     } else {
         avatarHtml = `<div class="avatar user-avatar">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -196,6 +200,7 @@ function renderTrends(trends) {
         .join("");
 
     container.innerHTML = `
+        <div class="trend-table-wrapper">
         <table class="trend-table">
             <thead>
                 <tr>
@@ -208,7 +213,18 @@ function renderTrends(trends) {
             </thead>
             <tbody>${rows}</tbody>
         </table>
+        </div>
     `;
+}
+
+function autoResizeInput() {
+    const input = document.getElementById("user-input");
+    if (!input) {
+        return;
+    }
+
+    input.style.height = "auto";
+    input.style.height = `${Math.min(input.scrollHeight, 180)}px`;
 }
 
 function renderAnalysis(data) {
@@ -251,6 +267,7 @@ async function sendMessage() {
 
     addMessage(message, "user");
     input.value = "";
+    autoResizeInput();
 
     const typingId = `typing-${Date.now()}`;
     addMessage("Analizando tu consulta...", "bot", typingId);
@@ -358,6 +375,13 @@ function initializeDashboard() {
     updateSessionLabel();
     clearAnalysis();
     testAPI();
+    autoResizeInput();
+
+    const input = document.getElementById("user-input");
+    if (input && !input.dataset.autoresizeBound) {
+        input.addEventListener("input", autoResizeInput);
+        input.dataset.autoresizeBound = "true";
+    }
 }
 
 window.testAPI = testAPI;
