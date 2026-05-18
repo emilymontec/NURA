@@ -1,5 +1,6 @@
 const API_BASE_URL = "/api";
 const SESSION_STORAGE_KEY = "nura_session_id";
+const CHAT_HISTORY_STORAGE_KEY = "nura_chat_history";
 
 const state = {
     analysis: null,
@@ -24,6 +25,87 @@ function escapeHtml(text) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+function getStoredChatHistory() {
+    try {
+        const raw = window.localStorage.getItem(CHAT_HISTORY_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function saveStoredChatHistory(items) {
+    window.localStorage.setItem(CHAT_HISTORY_STORAGE_KEY, JSON.stringify(items));
+}
+
+function buildChatHistoryTitle(entry) {
+    if (entry.fileName && entry.fileName !== "Sin archivo") {
+        return entry.fileName;
+    }
+    if (entry.firstPrompt) {
+        return entry.firstPrompt;
+    }
+    return entry.sessionId;
+}
+
+function upsertChatHistoryEntry(patch) {
+    const history = getStoredChatHistory();
+    const index = history.findIndex((item) => item.sessionId === patch.sessionId);
+    const previous = index >= 0 ? history[index] : null;
+    const nextEntry = {
+        sessionId: patch.sessionId,
+        firstPrompt: patch.firstPrompt || previous?.firstPrompt || "Nueva conversacion",
+        lastPreview: patch.lastPreview || previous?.lastPreview || "Sin mensajes aun.",
+        fileName: patch.fileName !== undefined ? patch.fileName : previous?.fileName || "Sin archivo",
+        updatedAt: patch.updatedAt || new Date().toISOString(),
+    };
+
+    if (index >= 0) {
+        history[index] = nextEntry;
+    } else {
+        history.push(nextEntry);
+    }
+
+    history.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    saveStoredChatHistory(history.slice(0, 12));
+    renderChatHistory();
+}
+
+function renderChatHistory() {
+    const container = document.getElementById("chat-history-list");
+    const countBadge = document.getElementById("history-count-badge");
+    if (!container) {
+        return;
+    }
+
+    const history = getStoredChatHistory();
+    if (countBadge) {
+        countBadge.textContent = String(history.length);
+    }
+
+    if (!history.length) {
+        container.innerHTML = `<div class="history-empty">Aun no hay conversaciones guardadas.</div>`;
+        return;
+    }
+
+    container.innerHTML = history
+        .map((entry) => {
+            const activeClass = entry.sessionId === state.sessionId ? " active" : "";
+            const title = escapeHtml(buildChatHistoryTitle(entry));
+            const preview = escapeHtml(entry.lastPreview || "Sin mensajes aun.");
+            const meta = entry.sessionId === state.sessionId ? "Sesion actual" : "Sesion guardada";
+            return `
+                <div class="history-item${activeClass}">
+                    <div class="history-item-title" title="${title}">${title}</div>
+                    <div class="history-item-meta">${meta}</div>
+                    <div class="history-item-preview">${preview}</div>
+                </div>
+            `;
+        })
+        .join("");
 }
 
 function formatNumber(value) {
@@ -136,6 +218,10 @@ function updateSessionLabel() {
     if (label) {
         label.textContent = state.sessionId;
     }
+    upsertChatHistoryEntry({
+        sessionId: state.sessionId,
+        updatedAt: new Date().toISOString(),
+    });
 }
 
 async function testAPI() {
@@ -185,6 +271,16 @@ function addMessage(text, sender, id = null) {
     msgDiv.innerHTML = avatarHtml + contentHtml;
     chatBox.appendChild(msgDiv);
     setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 10);
+
+    if (!id || !id.startsWith("typing")) {
+        upsertChatHistoryEntry({
+            sessionId: state.sessionId,
+            firstPrompt: sender === "user" ? text : undefined,
+            lastPreview: text,
+            fileName: state.analysis?.file_name,
+            updatedAt: new Date().toISOString(),
+        });
+    }
 }
 
 function usePrompt(prompt) {
@@ -244,6 +340,12 @@ function clearAnalysis() {
     if (insightsContainer) {
         insightsContainer.style.display = "none";
     }
+
+    upsertChatHistoryEntry({
+        sessionId: state.sessionId,
+        fileName: "Sin archivo",
+        updatedAt: new Date().toISOString(),
+    });
 }
 
 function renderInsights(insights) {
@@ -359,6 +461,12 @@ function renderAnalysis(data) {
 
     renderInsights(data.insights);
     renderTrends(data.trends);
+    upsertChatHistoryEntry({
+        sessionId: state.sessionId,
+        fileName,
+        lastPreview: `Dataset activo: ${fileName}`,
+        updatedAt: new Date().toISOString(),
+    });
 }
 
 async function sendMessage() {
@@ -483,6 +591,7 @@ async function handleFileUpload(event) {
 }
 
 function initializeDashboard() {
+    renderChatHistory();
     updateSessionLabel();
     clearAnalysis();
     testAPI();
