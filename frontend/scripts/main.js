@@ -27,6 +27,48 @@ function escapeHtml(text) {
         .replace(/'/g, "&#039;");
 }
 
+function formatInlineMarkdown(text) {
+    return text
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.+?)\*/g, "<em>$1</em>");
+}
+
+function formatMessageContent(text) {
+    const safeText = escapeHtml(text || "");
+    const lines = safeText.split("\n");
+    const parts = [];
+    let listItems = [];
+
+    const flushList = () => {
+        if (!listItems.length) {
+            return;
+        }
+        parts.push(`<ul>${listItems.join("")}</ul>`);
+        listItems = [];
+    };
+
+    for (const line of lines) {
+        const trimmed = line.trim();
+
+        if (!trimmed) {
+            flushList();
+            continue;
+        }
+
+        const bulletMatch = trimmed.match(/^[-*]\s+(.+)$/);
+        if (bulletMatch) {
+            listItems.push(`<li>${formatInlineMarkdown(bulletMatch[1])}</li>`);
+            continue;
+        }
+
+        flushList();
+        parts.push(`<p>${formatInlineMarkdown(trimmed)}</p>`);
+    }
+
+    flushList();
+    return parts.join("");
+}
+
 function getStoredChatHistory() {
     try {
         const raw = window.localStorage.getItem(CHAT_HISTORY_STORAGE_KEY);
@@ -265,8 +307,7 @@ function addMessage(text, sender, id = null) {
                       </div>`;
     }
 
-    const formattedText = escapeHtml(text).replace(/\n/g, "</p><p>");
-    const contentHtml = `<div class="msg-content"><p>${formattedText}</p></div>`;
+    const contentHtml = `<div class="msg-content">${formatMessageContent(text)}</div>`;
 
     msgDiv.innerHTML = avatarHtml + contentHtml;
     chatBox.appendChild(msgDiv);
