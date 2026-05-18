@@ -1096,12 +1096,13 @@ input {
 }
 
 .bot-msg {
-    justify-content: flex-start;
+    justify-content: flex-end;
+    flex-direction: row-reverse;
 }
 
 .user-msg {
-    justify-content: flex-end;
-    flex-direction: row-reverse;
+    justify-content: flex-start;
+    flex-direction: row;
 }
 
 .msg-content {
@@ -1119,13 +1120,13 @@ input {
 
 .bot-msg .msg-content {
     background: var(--bg-surface-strong);
-    border-radius: 18px 18px 18px 4px;
+    border-radius: 18px 18px 4px 18px;
 }
 
 .user-msg .msg-content {
     background: var(--bg-surface);
     border-color: var(--border-strong);
-    border-radius: 18px 18px 4px 18px;
+    border-radius: 18px 18px 18px 4px;
 }
 
 .intro-card {
