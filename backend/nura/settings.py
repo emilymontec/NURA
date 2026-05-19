@@ -4,7 +4,7 @@ Generated with modular structure and environment variable support.
 """
 import os
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 from dotenv import load_dotenv
 
 # Load .env variables
@@ -80,8 +80,8 @@ elif SUPABASE_DB_URL:
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': parsed_db_url.path.lstrip('/'),
-            'USER': parsed_db_url.username or '',
-            'PASSWORD': parsed_db_url.password or '',
+            'USER': unquote(parsed_db_url.username or ''),
+            'PASSWORD': unquote(parsed_db_url.password or ''),
             'HOST': parsed_db_url.hostname or '',
             'PORT': parsed_db_url.port or '5432',
             'CONN_MAX_AGE': int(os.getenv('DB_CONN_MAX_AGE', '60')),
