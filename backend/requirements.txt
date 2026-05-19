@@ -186,3 +186,4 @@ wsproto
 yarl
 zope.event
 zope.interface
+psycopg2-binary
