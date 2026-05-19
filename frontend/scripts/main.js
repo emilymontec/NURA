@@ -1,4 +1,6 @@
-const API_BASE_URL = "/api";
+const APP_CONFIG = window.NURA_CONFIG || {};
+const API_BASE_URL = APP_CONFIG.apiBaseUrl || "/api";
+const LOGO_URL = APP_CONFIG.logoUrl || "/static/assets/logo.png";
 const SESSION_STORAGE_KEY = "nura_session_id";
 const CHAT_HISTORY_STORAGE_KEY = "nura_chat_history";
 
@@ -237,7 +239,7 @@ function getRiskLabel(riskLevel, score) {
 
 function getBotAvatarMarkup() {
     return `<div class="avatar nura-avatar">
-                <img src="assets/logo.png" alt="NURA" class="avatar-logo">
+                <img src="${LOGO_URL}" alt="NURA" class="avatar-logo">
             </div>`;
 }
 
