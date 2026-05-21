@@ -71,61 +71,25 @@ function formatMessageContent(text) {
     return parts.join("");
 }
 
-function getStoredChatHistory() {
+async function fetchSessions() {
     try {
-        const raw = window.localStorage.getItem(CHAT_HISTORY_STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed : [];
-    } catch (error) {
-        return [];
+        const response = await fetch(`${API_BASE_URL}/sessions/`);
+        if (response.ok) {
+            const data = await response.json();
+            return data.sessions || [];
+        }
+    } catch (e) {
+        console.error("Error fetching sessions:", e);
     }
+    return [];
 }
 
-function saveStoredChatHistory(items) {
-    window.localStorage.setItem(CHAT_HISTORY_STORAGE_KEY, JSON.stringify(items));
-}
-
-function buildChatHistoryTitle(entry) {
-    if (entry.fileName && entry.fileName !== "Sin archivo") {
-        return entry.fileName;
-    }
-    if (entry.firstPrompt) {
-        return entry.firstPrompt;
-    }
-    return entry.sessionId;
-}
-
-function upsertChatHistoryEntry(patch) {
-    const history = getStoredChatHistory();
-    const index = history.findIndex((item) => item.sessionId === patch.sessionId);
-    const previous = index >= 0 ? history[index] : null;
-    const nextEntry = {
-        sessionId: patch.sessionId,
-        firstPrompt: patch.firstPrompt || previous?.firstPrompt || "Nueva conversacion",
-        lastPreview: patch.lastPreview || previous?.lastPreview || "Sin mensajes aun.",
-        fileName: patch.fileName !== undefined ? patch.fileName : previous?.fileName || "Sin archivo",
-        updatedAt: patch.updatedAt || new Date().toISOString(),
-    };
-
-    if (index >= 0) {
-        history[index] = nextEntry;
-    } else {
-        history.push(nextEntry);
-    }
-
-    history.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-    saveStoredChatHistory(history.slice(0, 12));
-    renderChatHistory();
-}
-
-function renderChatHistory() {
+async function renderChatHistory() {
     const container = document.getElementById("chat-history-list");
     const countBadge = document.getElementById("history-count-badge");
-    if (!container) {
-        return;
-    }
+    if (!container) return;
 
-    const history = getStoredChatHistory();
+    const history = await fetchSessions();
     if (countBadge) {
         countBadge.textContent = String(history.length);
     }
@@ -137,20 +101,130 @@ function renderChatHistory() {
 
     container.innerHTML = history
         .map((entry) => {
-            const activeClass = entry.sessionId === state.sessionId ? " active" : "";
-            const title = escapeHtml(buildChatHistoryTitle(entry));
-            const preview = escapeHtml(entry.lastPreview || "Sin mensajes aun.");
-            const meta = entry.sessionId === state.sessionId ? "Sesion actual" : "Sesion guardada";
+            const activeClass = entry.session_id === state.sessionId ? " active" : "";
+            const title = escapeHtml(entry.title || "Nueva sesión");
             return `
-                <div class="history-item${activeClass}">
+                <div class="history-item${activeClass}" onclick="loadSession('${entry.session_id}')">
                     <div class="history-item-title" title="${title}">${title}</div>
-                    <div class="history-item-meta">${meta}</div>
-                    <div class="history-item-preview">${preview}</div>
+                    <div class="history-item-actions">
+                        <button class="icon-btn edit-btn" onclick="event.stopPropagation(); renameSession('${entry.session_id}', '${title}')" title="Renombrar">✎</button>
+                        <button class="icon-btn delete-btn" onclick="event.stopPropagation(); deleteSession('${entry.session_id}')" title="Eliminar">🗑</button>
+                    </div>
                 </div>
             `;
         })
         .join("");
 }
+
+async function loadSession(sessionId) {
+    if (state.sessionId === sessionId) return;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/`);
+        if (response.ok) {
+            const data = await response.json();
+            state.sessionId = data.session_id;
+            window.localStorage.setItem(SESSION_STORAGE_KEY, state.sessionId);
+            
+            const chatBox = document.getElementById("chat-box");
+            if (chatBox) {
+                // Clear chat box except welcome screen
+                const welcomeScreen = document.getElementById("welcome-screen-box");
+                chatBox.innerHTML = "";
+                if (welcomeScreen) {
+                    chatBox.appendChild(welcomeScreen);
+                    welcomeScreen.style.display = data.messages.length > 0 ? "none" : "block";
+                }
+                
+                // Add messages
+                data.messages.forEach(msg => {
+                    const role = msg.role === "user" ? "user" : "bot";
+                    const safeText = escapeHtml(msg.content);
+                    const msgDiv = document.createElement("div");
+                    msgDiv.className = `message ${role}-msg`;
+                    
+                    let avatarHtml = role === "bot" ? getBotAvatarMarkup() : 
+                        `<div class="avatar user-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>`;
+                    
+                    msgDiv.innerHTML = avatarHtml + `<div class="msg-content">${formatMessageContent(msg.content)}</div>`;
+                    chatBox.appendChild(msgDiv);
+                });
+                
+                setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 10);
+            }
+            
+            // Set dataset context if available
+            if (data.dataset_context && data.dataset_context.file_name) {
+                renderAnalysis(data.dataset_context);
+            } else {
+                clearAnalysis();
+            }
+            
+            renderChatHistory();
+        } else if (response.status === 404) {
+            renderChatHistory();
+        }
+    } catch (e) {
+        console.error("Error loading session:", e);
+        renderChatHistory();
+    }
+}
+
+async function renameSession(sessionId, currentTitle) {
+    const newTitle = prompt("Nuevo nombre para la sesión:", currentTitle);
+    if (!newTitle || newTitle.trim() === "" || newTitle === currentTitle) return;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/rename/`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: newTitle.trim() })
+        });
+        if (response.ok) {
+            renderChatHistory();
+        }
+    } catch (e) {
+        console.error("Error renaming session:", e);
+    }
+}
+
+async function deleteSession(sessionId) {
+    if (!confirm("¿Estás seguro de que deseas eliminar esta sesión?")) return;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/delete/`, {
+            method: "DELETE"
+        });
+        if (response.ok) {
+            if (state.sessionId === sessionId) {
+                startNewSession();
+            } else {
+                renderChatHistory();
+            }
+        }
+    } catch (e) {
+        console.error("Error deleting session:", e);
+    }
+}
+
+function startNewSession() {
+    state.sessionId = `nura-${Date.now()}`;
+    window.localStorage.setItem(SESSION_STORAGE_KEY, state.sessionId);
+    
+    const chatBox = document.getElementById("chat-box");
+    if (chatBox) {
+        const welcomeScreen = document.getElementById("welcome-screen-box");
+        chatBox.innerHTML = "";
+        if (welcomeScreen) {
+            chatBox.appendChild(welcomeScreen);
+            welcomeScreen.style.display = "block";
+        }
+    }
+    
+    clearAnalysis();
+    renderChatHistory();
+}
+
 
 function formatNumber(value) {
     if (value === null || value === undefined || Number.isNaN(Number(value))) {
@@ -262,10 +336,6 @@ function updateSessionLabel() {
     if (label) {
         label.textContent = state.sessionId;
     }
-    upsertChatHistoryEntry({
-        sessionId: state.sessionId,
-        updatedAt: new Date().toISOString(),
-    });
 }
 
 async function testAPI() {
@@ -316,13 +386,7 @@ function addMessage(text, sender, id = null) {
     setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 10);
 
     if (!id || !id.startsWith("typing")) {
-        upsertChatHistoryEntry({
-            sessionId: state.sessionId,
-            firstPrompt: sender === "user" ? text : undefined,
-            lastPreview: text,
-            fileName: state.analysis?.file_name,
-            updatedAt: new Date().toISOString(),
-        });
+        renderChatHistory(); // Update chat history implicitly from backend or state if necessary
     }
 }
 
@@ -384,11 +448,8 @@ function clearAnalysis() {
         insightsContainer.style.display = "none";
     }
 
-    upsertChatHistoryEntry({
-        sessionId: state.sessionId,
-        fileName: "Sin archivo",
-        updatedAt: new Date().toISOString(),
-    });
+    // Clear history or update
+    // renderChatHistory();
 }
 
 function renderInsights(insights) {
@@ -503,13 +564,8 @@ function renderAnalysis(data) {
     }
 
     renderInsights(data.insights);
-    renderTrends(data.trends);
-    upsertChatHistoryEntry({
-        sessionId: state.sessionId,
-        fileName,
-        lastPreview: `Dataset activo: ${fileName}`,
-        updatedAt: new Date().toISOString(),
-    });
+    // Fetch history or update it to reflect the active file context
+    renderChatHistory();
 }
 
 async function sendMessage() {
@@ -541,6 +597,11 @@ async function sendMessage() {
 
         if (response.ok && data.response) {
             addMessage(data.response, "bot");
+            // Auto rename if it's the first message
+            const countBadge = document.getElementById("history-count-badge");
+            if (countBadge) {
+                 renderChatHistory(); // Ensure the new session shows up
+            }
             return;
         }
 
@@ -634,9 +695,13 @@ async function handleFileUpload(event) {
 }
 
 function initializeDashboard() {
-    renderChatHistory();
+    // Load current session from backend if not just created
+    if (state.sessionId) {
+        loadSession(state.sessionId);
+    } else {
+        renderChatHistory();
+    }
     updateSessionLabel();
-    clearAnalysis();
     testAPI();
     autoResizeInput();
 
@@ -663,3 +728,7 @@ window.clearAnalysis = clearAnalysis;
 window.initializeDashboard = initializeDashboard;
 window.usePrompt = usePrompt;
 window.toggleAnalytics = toggleAnalytics;
+window.loadSession = loadSession;
+window.renameSession = renameSession;
+window.deleteSession = deleteSession;
+window.startNewSession = startNewSession;

@@ -3,6 +3,7 @@ from django.db import models
 
 class ChatSession(models.Model):
     session_id = models.CharField(max_length=120, unique=True)
+    title = models.CharField(max_length=200, default="Nueva sesión")
     rolling_summary = models.TextField(blank=True, default="")
     dataset_context = models.JSONField(default=dict, blank=True)
     dataset_history = models.JSONField(default=list, blank=True)

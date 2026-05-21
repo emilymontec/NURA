@@ -2,8 +2,10 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
+from django.views.decorators.http import require_http_methods
 from ai.llm import chat_with_data, generate_ai_report
 from ai.memory import memory
+from .models import ChatSession, ChatMessage
 
 def index(request):
     """Render the basic frontend HTML."""
@@ -85,3 +87,80 @@ def chat_endpoint(request):
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
     return JsonResponse({"error": "Se requiere una peticion POST"}, status=400)
+
+
+@csrf_exempt
+def list_sessions(request):
+    """List all chat sessions."""
+    if request.method == "GET":
+        sessions = ChatSession.objects.all().order_by('-updated_at')
+        session_data = [
+            {
+                "session_id": s.session_id,
+                "title": s.title,
+                "updated_at": s.updated_at.isoformat()
+            }
+            for s in sessions
+        ]
+        return JsonResponse({"sessions": session_data})
+    return JsonResponse({"error": "Metodo no permitido"}, status=405)
+
+
+@csrf_exempt
+def get_session_history(request, session_id):
+    """Get chat history and context for a specific session."""
+    if request.method == "GET":
+        try:
+            session = ChatSession.objects.get(session_id=session_id)
+            messages = session.messages.filter(role__in=['user', 'assistant']).order_by('created_at')
+            message_data = [
+                {
+                    "role": m.role,
+                    "content": m.content,
+                    "created_at": m.created_at.isoformat()
+                }
+                for m in messages
+            ]
+            return JsonResponse({
+                "session_id": session.session_id,
+                "title": session.title,
+                "dataset_context": session.dataset_context,
+                "messages": message_data
+            })
+        except ChatSession.DoesNotExist:
+            return JsonResponse({"error": "Sesion no encontrada"}, status=404)
+    return JsonResponse({"error": "Metodo no permitido"}, status=405)
+
+
+@csrf_exempt
+def rename_session(request, session_id):
+    """Rename a specific chat session."""
+    if request.method == "PUT":
+        try:
+            data = json.loads(request.body)
+            new_title = data.get("title", "").strip()
+            if not new_title:
+                return JsonResponse({"error": "El titulo no puede estar vacio"}, status=400)
+            
+            session = ChatSession.objects.get(session_id=session_id)
+            session.title = new_title
+            session.save(update_fields=['title', 'updated_at'])
+            return JsonResponse({"status": "ok", "title": session.title})
+        except ChatSession.DoesNotExist:
+            return JsonResponse({"error": "Sesion no encontrada"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Metodo no permitido"}, status=405)
+
+
+@csrf_exempt
+def delete_session(request, session_id):
+    """Delete a specific chat session."""
+    if request.method == "DELETE":
+        try:
+            session = ChatSession.objects.get(session_id=session_id)
+            session.delete()
+            return JsonResponse({"status": "ok", "message": "Sesion eliminada correctamente"})
+        except ChatSession.DoesNotExist:
+            return JsonResponse({"error": "Sesion no encontrada"}, status=404)
+    return JsonResponse({"error": "Metodo no permitido"}, status=405)
