@@ -1,6 +1,6 @@
 # analytics/analyzer.py
 """Utilities to analyze business datasets using pandas."""
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 import pandas as pd
 

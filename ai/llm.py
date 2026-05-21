@@ -3,7 +3,7 @@ import os
 from groq import Groq
 from dotenv import load_dotenv
 from .agents import run_agent_system, get_agent_options, AGENT_REGISTRY, run_specialist_agent
-from .prompts import EXECUTIVE_REPORT_PROMPT, CHAT_ANALYST_PROMPT, AGENT_SYNTHESIS_PROMPT, AGENT_ROUTER_PROMPT
+from .prompts import EXECUTIVE_REPORT_PROMPT, CHAT_ANALYST_PROMPT, AGENT_ROUTER_PROMPT
 
 load_dotenv()
 
