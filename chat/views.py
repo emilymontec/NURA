@@ -52,6 +52,19 @@ def analyze_endpoint(request):
             safe_context = make_json_safe(context)
             memory.store_dataset_context(session_id, safe_context)
             
+            # Guardar en el historial de chat la carga del archivo para evitar sesiones vacias que no se visualizan bien
+            memory.add_message(session_id, "user", f"Archivo cargado: {file.name}")
+            
+            score = safe_context['health'].get('health_score')
+            score_str = f"{score:.2f}" if score is not None else "0.00"
+            bot_msg1 = f"Analisis completado.\nArchivo: {safe_context['file_name']}\nRegistros: {safe_context['summary']['rows']}\nColumnas: {safe_context['summary']['columns']}\nRiesgo: {safe_context['health']['risk_level']}\nSalud: {score_str}"
+            memory.add_message(session_id, "assistant", bot_msg1)
+            
+            if insights:
+                insights_text = "\n- ".join(insights)
+                bot_msg2 = f"Insights iniciales:\n- {insights_text}"
+                memory.add_message(session_id, "assistant", bot_msg2)
+            
             return JsonResponse(safe_context)
         except Exception as e:
             return JsonResponse({"error": f"Error al analizar el archivo: {str(e)}"}, status=500)
