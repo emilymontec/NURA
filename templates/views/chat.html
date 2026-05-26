@@ -19,13 +19,15 @@
             </div>
 
             <div class="sidebar-content">
+                <button class="btn-new-chat" onclick="startNewSession()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Nuevo mensaje
+                </button>
+
                 <section class="sidebar-section">
-                    <div class="section-heading compact-heading" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <span class="section-title">Historial de chats</span>
-                            <span class="mini-badge neutral history-count" id="history-count-badge">0</span>
-                        </div>
-                        <button class="icon-btn" onclick="startNewSession()" title="Nuevo Chat" style="background: none; border: none; color: var(--text-primary); cursor: pointer; padding: 4px; font-size: 1.2rem;">+</button>
+                    <div class="section-heading compact-heading" style="display: flex; justify-content: flex-start; align-items: center; gap: 8px; margin-bottom: 12px;">
+                        <span class="section-title" style="margin-bottom: 0;">Historial de chats</span>
+                        <span class="mini-badge neutral history-count" id="history-count-badge" style="margin-bottom: 0;">0</span>
                     </div>
                     <div class="chat-history-list" id="chat-history-list">
                         <div class="history-empty">Aun no hay conversaciones guardadas.</div>
@@ -63,14 +65,14 @@
                 </div>
                 <div class="header-actions">
                     <button class="analytics-toggle-btn" id="analytics-toggle-btn" onclick="toggleAnalytics()"
-                        title="Ver Analíticas de Datos">
+                        title="Ver Resumen de Datos">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="20" x2="18" y2="10"></line>
                             <line x1="12" y1="20" x2="12" y2="4"></line>
                             <line x1="6" y1="20" x2="6" y2="14"></line>
                         </svg>
-                        <span>Analíticas</span>
+                        <span>Resumen</span>
                     </button>
                 </div>
             </header>
@@ -82,7 +84,7 @@
                             <h1 class="monolith-title">NURA</h1>
                             <div class="terminal-stream">
                                 <p class="ai-thought">
-                                    ¡Hola! Soy <strong>NURA Inteligencia</strong>. "Las corrientes de datos fluyen en el silencio. Haz tu primera pregunta o carga un dataset para activar las analíticas."
+                                    ¡Hola! Soy NURA. Sube un archivo con tu información (Excel o CSV) y te ayudaré a entender qué significan tus números de forma sencilla.
                                 </p>
                             </div>
                         </div>
@@ -104,9 +106,9 @@
                                 <p>Pasos y señales para detectar anomalías.</p>
                             </button>
                             <button class="welcome-prompt-card"
-                                onclick="usePrompt('Genera un resumen ejecutivo del dataset cargado.')">
+                                onclick="usePrompt('¿Me puedes dar un resumen de la información que acabo de subir?')">
                                 <h3>Resumen</h3>
-                                <p>Síntesis de salud y hallazgos iniciales.</p>
+                                <p>Resumen principal y detalles importantes.</p>
                             </button>
                         </div>
                     </div>
@@ -125,7 +127,7 @@
                             </path>
                         </svg>
                     </button>
-                    <textarea id="user-input" placeholder="Comulgar con la red..."
+                    <textarea id="user-input" placeholder="Escribe tu mensaje aquí..."
                         onkeypress="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"
                         rows="1"></textarea>
                     <button class="send-btn" id="send-button" onclick="sendMessage()" title="Enviar">
@@ -153,7 +155,7 @@
                         <line x1="12" y1="20" x2="12" y2="4"></line>
                         <line x1="6" y1="20" x2="6" y2="14"></line>
                     </svg>
-                    <h3>Análisis de Dataset</h3>
+                    <h3>Resumen de tus Datos</h3>
                 </div>
                 <button class="close-analytics-btn" onclick="toggleAnalytics()" title="Cerrar panel">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -197,7 +199,7 @@
 
                 <div class="analytics-section" id="insights-container" style="display: none;">
                     <div class="section-heading">
-                        <span class="section-title">Insights Automatizados</span>
+                        <span class="section-title">Descubrimientos Automáticos</span>
                         <span class="mini-badge">Filtros</span>
                     </div>
                     <div class="insights-list" id="insights-list"></div>
@@ -206,8 +208,7 @@
                 <div class="analytics-section">
                     <span class="section-title">Tendencias y Distribución</span>
                     <div id="trends-table" class="trends-placeholder">
-                        Sube un archivo de datos para calcular métricas de distribución, tendencias y anomalías en
-                        tiempo real.
+                        Sube un archivo con tus datos para mostrarte promedios, tendencias y detalles interesantes.
                     </div>
                 </div>
             </div>

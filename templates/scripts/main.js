@@ -95,14 +95,14 @@ async function renderChatHistory() {
     }
 
     if (!history.length) {
-        container.innerHTML = `<div class="history-empty">Aun no hay conversaciones guardadas.</div>`;
+        container.innerHTML = `<div class="history-empty">Aún no tienes conversaciones guardadas.</div>`;
         return;
     }
 
     container.innerHTML = history
         .map((entry) => {
             const activeClass = entry.session_id === state.sessionId ? " active" : "";
-            const title = escapeHtml(entry.title || "Nueva sesión");
+            const title = escapeHtml(entry.title || "Nuevo chat");
             return `
                 <div class="history-item${activeClass}" onclick="loadSession('${entry.session_id}')">
                     <div class="history-item-title" title="${title}">${title}</div>
@@ -298,7 +298,7 @@ function updateHeroSummary({
     file = "Sin archivo",
     rows = "0",
     risk = "Sin evaluar",
-    health = "Conversacion general disponible. Puedes preguntar sin subir archivos.",
+    health = "Chat general activo. Puedes preguntarme cosas sin subir archivos.",
     riskLevel = "",
 } = {}) {
     setText("hero-file", file, file);
@@ -342,14 +342,14 @@ function updateSessionLabel() {
 }
 
 async function testAPI() {
-    setApiStatus("Comprobando...", "Validando conectividad del backend.", "loading");
+    setApiStatus("Comprobando...", "Validando conexión con el servidor.", "loading");
 
     try {
         const response = await fetch(`${API_BASE_URL}/test/`);
         const data = await response.json();
-        setApiStatus("Conectado", data.message || "Backend operativo.", "ok");
+        setApiStatus("Conectado", data.message || "Servidor operativo.", "ok");
     } catch (error) {
-        setApiStatus("Sin conexion", "No fue posible contactar al backend.", "error");
+        setApiStatus("Sin conexion", "No fue posible contactar al servidor.", "error");
     }
 }
 
@@ -415,7 +415,7 @@ function clearAnalysis() {
     setText("stat-rows", "0");
     setText("stat-columns", "0");
     setRiskValue("stat-risk", "Sin evaluar", "");
-    setText("stat-health-detail", "Salud de datos pendiente");
+    setText("stat-health-detail", "Revisión de datos pendiente");
     setText("hero-columns", "0");
     setText("hero-flow", "Chat general activo");
     updateHeroSummary();
@@ -428,18 +428,18 @@ function clearAnalysis() {
 
     const elUploadHint = document.getElementById("upload-hint");
     if (elUploadHint) {
-        elUploadHint.textContent = "Sube archivos CSV o Excel para activar las analíticas avanzadas.";
+        elUploadHint.textContent = "Sube archivos con tus datos (CSV o Excel) para iniciar el análisis.";
     }
 
     const elInsightsList = document.getElementById("insights-list");
     if (elInsightsList) {
-        elInsightsList.innerHTML = "Carga un archivo para ver alertas, patrones y recomendaciones iniciales.";
+        elInsightsList.innerHTML = "Sube un archivo para ver alertas, patrones y recomendaciones.";
     }
 
     const elTrendsTable = document.getElementById("trends-table");
     if (elTrendsTable) {
         elTrendsTable.classList.remove("has-table");
-        elTrendsTable.innerHTML = "Carga un dataset para ver indicadores numéricos y tendencias relevantes.";
+        elTrendsTable.innerHTML = "Sube un archivo con tus datos para mostrarte promedios, tendencias y detalles interesantes.";
     }
 
     const insightsContainer = document.getElementById("insights-container");
@@ -458,7 +458,7 @@ function renderInsights(insights) {
     }
 
     if (!insights || !insights.length) {
-        container.innerHTML = "No se detectaron insights relevantes con el archivo actual.";
+        container.innerHTML = "No encontramos patrones destacables en este archivo.";
         return;
     }
 
@@ -476,7 +476,7 @@ function renderTrends(trends) {
     const entries = Object.entries(trends || {});
     if (!entries.length) {
         container.classList.remove("has-table");
-        container.innerHTML = "El archivo no contiene columnas numericas suficientes para estimar tendencias.";
+        container.innerHTML = "El archivo necesita más datos numéricos para calcular proyecciones.";
         return;
     }
 
@@ -528,7 +528,7 @@ function renderAnalysis(data) {
     const rowCount = formatNumber(data.summary?.rows);
     const columnCount = formatNumber(data.summary?.columns);
     const riskLabel = getRiskLabel(data.health?.risk_level, data.health?.health_score);
-    const healthSummary = `Faltantes: ${formatNumber(data.summary?.total_missing)} · Duplicados: ${formatNumber(data.summary?.duplicate_rows)}`;
+    const healthSummary = `Celdas vacías: ${formatNumber(data.summary?.total_missing)} · Datos repetidos: ${formatNumber(data.summary?.duplicate_rows)}`;
 
     setText("selected-file-label", fileName, fileName);
     setText("stat-file", fileName, fileName);
@@ -537,7 +537,7 @@ function renderAnalysis(data) {
     setRiskValue("stat-risk", riskLabel, data.health?.risk_level);
     setText("stat-health-detail", healthSummary);
     setText("hero-columns", columnCount);
-    setText("hero-flow", "Analisis disponible");
+    setText("hero-flow", "Análisis listo");
     updateHeroSummary({
         file: fileName,
         rows: rowCount,
@@ -554,7 +554,7 @@ function renderAnalysis(data) {
 
     const elUploadHint = document.getElementById("upload-hint");
     if (elUploadHint) {
-        elUploadHint.textContent = "Análisis generado. Ya puedes preguntar al chat por riesgos, patrones o recomendaciones.";
+        elUploadHint.textContent = "¡Análisis terminado! Ya puedes preguntarme sobre los riesgos, patrones o qué te recomiendo hacer.";
     }
 
     const insightsContainer = document.getElementById("insights-container");
@@ -579,7 +579,7 @@ async function sendMessage() {
     autoResizeInput();
 
     const typingId = `typing-${Date.now()}`;
-    addMessage("Analizando tu consulta...", "bot", typingId);
+    addMessage("Revisando tu pregunta...", "bot", typingId);
 
     try {
         const response = await fetch(`${API_BASE_URL}/chat/`, {
@@ -610,7 +610,7 @@ async function sendMessage() {
         if (typingEl) {
             typingEl.remove();
         }
-        addMessage("Error de conexion. Verifica que el backend este en ejecucion.", "bot");
+        addMessage("No hay conexión con el servidor. Verifica que esté funcionando.", "bot");
     }
 }
 
@@ -637,12 +637,12 @@ async function handleFileUpload(event) {
     setText("selected-file-label", file.name, file.name);
     setText("stat-file", file.name, file.name);
     setText("hero-columns", "Calculando");
-    setText("hero-flow", "Extrayendo señales");
+    setText("hero-flow", "Leyendo información");
     updateHeroSummary({
         file: file.name,
         rows: "Procesando",
         risk: "En calculo",
-        health: "Estamos evaluando calidad, faltantes y tendencias.",
+        health: "Estamos revisando tus datos para ver qué encontramos.",
         riskLevel: "",
     });
     setDatasetState("Procesando", "neutral");
@@ -650,7 +650,7 @@ async function handleFileUpload(event) {
     addMessage(`Archivo cargado: ${file.name}`, "user");
 
     const typingId = `typing-${Date.now()}`;
-    addMessage("Procesando archivo y calculando insights...", "bot", typingId);
+    addMessage("Leyendo archivo y buscando información importante...", "bot", typingId);
 
     const formData = new FormData();
     formData.append("file", file);
@@ -675,19 +675,19 @@ async function handleFileUpload(event) {
 
         renderAnalysis(data);
         addMessage(
-            `Analisis completado.\nArchivo: ${data.file_name}\nRegistros: ${data.summary.rows}\nColumnas: ${data.summary.columns}\nRiesgo: ${data.health.risk_level}\nSalud: ${formatDecimal(data.health.health_score)}`,
+            `¡Análisis completado!\nArchivo: ${data.file_name}\nFilas: ${data.summary.rows}\nColumnas: ${data.summary.columns}\nRiesgo: ${data.health.risk_level}\nCalidad de datos: ${formatDecimal(data.health.health_score)}`,
             "bot"
         );
 
         if (data.insights?.length) {
-            addMessage(`Insights iniciales:\n- ${data.insights.join("\n- ")}`, "bot");
+            addMessage(`He encontrado esto:\n- ${data.insights.join("\n- ")}`, "bot");
         }
     } catch (error) {
         const typingEl = document.getElementById(typingId);
         if (typingEl) {
             typingEl.remove();
         }
-        addMessage("No fue posible subir o analizar el archivo. Revisa el backend.", "bot");
+        addMessage("No fue posible subir o analizar el archivo. Revisa tu conexión con el servidor.", "bot");
     }
 
     event.target.value = "";

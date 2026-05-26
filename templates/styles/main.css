@@ -1285,31 +1285,46 @@ input {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.bot-msg,
-.user-msg {
+.bot-msg {
     justify-content: flex-start;
     flex-direction: row;
-    align-self: stretch;
+    align-self: flex-start;
+}
+
+.user-msg {
+    justify-content: flex-start;
+    flex-direction: row-reverse;
+    align-self: flex-end;
 }
 
 .bot-msg.loading {
     width: auto;
+    max-width: 70%;
+    margin-right: auto;
 }
 
 .msg-content {
-    flex: 1;
+    max-width: 85%;
     min-width: 0;
-    padding: 6px 0;
-    line-height: 1.7;
-    font-size: 0.95rem;
+    border-radius: 12px;
+    padding: 16px 22px;
+    line-height: 1.65;
+    font-size: 0.92rem;
     color: var(--text-primary);
+    box-shadow: var(--shadow-soft);
 }
 
-.bot-msg .msg-content,
+.bot-msg .msg-content {
+    background: var(--bg-surface-strong);
+    border: 1px solid var(--border-color);
+    border-left: 2px solid var(--cyan);
+    border-radius: 4px 16px 16px 16px;
+}
+
 .user-msg .msg-content {
-    background: transparent;
-    border: none;
-    box-shadow: none;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px 4px 16px 16px;
 }
 
 .intro-card {
