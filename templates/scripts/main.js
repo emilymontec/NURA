@@ -106,9 +106,12 @@ async function renderChatHistory() {
             return `
                 <div class="history-item${activeClass}" onclick="loadSession('${entry.session_id}')">
                     <div class="history-item-title" title="${title}">${title}</div>
-                    <div class="history-item-actions">
-                        <button class="icon-btn edit-btn" onclick="event.stopPropagation(); renameSession('${entry.session_id}', '${title}')" title="Renombrar">✎</button>
-                        <button class="icon-btn delete-btn" onclick="event.stopPropagation(); deleteSession('${entry.session_id}')" title="Eliminar">🗑</button>
+                    <div class="history-menu-container" onclick="event.stopPropagation();">
+                        <button class="icon-btn menu-trigger">⋮</button>
+                        <div class="history-dropdown">
+                            <button onclick="renameSession('${entry.session_id}', '${title}')">Renombrar</button>
+                            <button onclick="deleteSession('${entry.session_id}')">Eliminar</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -116,8 +119,8 @@ async function renderChatHistory() {
         .join("");
 }
 
-async function loadSession(sessionId) {
-    if (state.sessionId === sessionId) return;
+async function loadSession(sessionId, force = false) {
+    if (!force && state.sessionId === sessionId) return;
     
     try {
         const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/`);
@@ -384,10 +387,6 @@ function addMessage(text, sender, id = null) {
     msgDiv.innerHTML = avatarHtml + contentHtml;
     chatBox.appendChild(msgDiv);
     setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 10);
-
-    if (!id || !id.startsWith("typing")) {
-        renderChatHistory(); // Update chat history implicitly from backend or state if necessary
-    }
 }
 
 function usePrompt(prompt) {
@@ -697,7 +696,7 @@ async function handleFileUpload(event) {
 function initializeDashboard() {
     // Load current session from backend if not just created
     if (state.sessionId) {
-        loadSession(state.sessionId);
+        loadSession(state.sessionId, true);
     } else {
         renderChatHistory();
     }
