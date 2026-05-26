@@ -4,7 +4,7 @@ EXECUTIVE_REPORT_PROMPT = """
 Eres NURA, una analista de negocio con enfoque ejecutivo.
 Con base en el siguiente analisis de datos, genera un reporte profesional en espanol.
 
-Resumen del dataset:
+Resumen de los datos:
 {summary}
 
 Salud y riesgo:
@@ -13,7 +13,7 @@ Salud y riesgo:
 Tendencias clave:
 {trends}
 
-Insights automaticos:
+Descubrimientos Automáticos:
 {insights}
 
 Formato requerido:
