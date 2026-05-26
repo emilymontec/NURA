@@ -237,12 +237,12 @@ input {
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: var(--bg-surface);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: var(--bg-main);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     border: none;
-    border-right: 1px solid var(--border-color);
-    box-shadow: none;
+    border-right: 1px solid rgba(0, 242, 254, 0.08);
+    box-shadow: inset -1px 0 20px rgba(0, 242, 254, 0.02);
     overflow: hidden;
 }
 
@@ -455,17 +455,29 @@ input {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 12px 16px;
-    color: var(--bg-main);
-    background: var(--text-primary);
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: var(--text-primary);
+    background: var(--bg-surface-strong);
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: var(--shadow-soft);
+    box-shadow: none;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
+
+.btn-new-chat:hover {
+    background: var(--bg-panel);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.1), inset 0 0 20px rgba(112, 0, 255, 0.05);
+    color: var(--text-primary);
+    transition: ease 0.2s;
+}
+
+/* Remove gradient overlay and subtle hover effect */
+
 
 .btn-new-chat:hover,
 .ghost-action:hover,
@@ -702,14 +714,14 @@ input {
     overflow: hidden;
 }
 
-/* Chat Header (Claude Style) */
+/* Chat Header */
 .chat-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 16px 24px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    background: transparent;
+    background: linear-gradient(90deg, rgba(0, 242, 254, 0.02) 0%, transparent 40%, rgba(177, 86, 255, 0.02) 100%);
     flex-shrink: 0;
 }
 
@@ -788,12 +800,22 @@ input {
 
 .monolith-title {
     font-family: "Cinzel", serif;
-    font-size: 1rem;
-    letter-spacing: 10px;
-    color: rgba(255, 255, 255, 0.75);
+    font-size: 1.4rem;
+    letter-spacing: 12px;
+    color: var(--text-primary);
+
+
+
+
     text-align: center;
-    text-indent: 10px;
-    transition: color 1s, text-shadow 1s;
+
+
+
+}
+
+@keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
 }
 
 .terminal-stream {
@@ -838,17 +860,33 @@ input {
     align-items: flex-start;
     text-align: left;
     padding: 16px 18px;
-    border-radius: 12px;
+    border-radius: 8px;
     border: 1px solid var(--border-color);
     background: rgba(255, 255, 255, 0.02);
     cursor: pointer;
-    transition: border-color 0.18s, background 0.18s, transform 0.18s;
+    transition: border-color 0.25s, background 0.25s, transform 0.25s, box-shadow 0.25s;
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-prompt-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.04) 0%, rgba(177, 86, 255, 0.04) 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
 .welcome-prompt-card:hover {
-    border-color: var(--border-strong);
-    background: rgba(255, 255, 255, 0.04);
-    transform: translateY(-2px);
+    border-color: rgba(0, 242, 254, 0.2);
+    background: rgba(255, 255, 255, 0.03);
+    transform: translateY(-3px);
+
+}
+
+.welcome-prompt-card:hover::after {
+    opacity: 1;
 }
 
 .welcome-prompt-card h3 {
@@ -856,12 +894,16 @@ input {
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 6px;
+    position: relative;
+    z-index: 1;
 }
 
 .welcome-prompt-card p {
     font-size: 0.8rem;
     color: var(--text-secondary);
     line-height: 1.4;
+    position: relative;
+    z-index: 1;
 }
 
 /* Sidebar Sections & Context Elements */
@@ -906,16 +948,19 @@ input {
     text-align: left;
     cursor: pointer;
     position: relative;
+    transition: all 0.25s;
 }
 
 .history-item:hover {
-    border-color: var(--border-strong);
-    background: rgba(255, 255, 255, 0.045);
+    border-color: rgba(177, 86, 255, 0.18);
+    background: rgba(177, 86, 255, 0.04);
+    box-shadow: 0 2px 12px rgba(177, 86, 255, 0.06);
 }
 
 .history-item.active {
-    border-color: rgba(103, 229, 234, 0.22);
-    background: rgba(103, 229, 234, 0.06);
+    border-color: rgba(0, 242, 254, 0.22);
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.06), rgba(177, 86, 255, 0.04));
+    box-shadow: 0 0 16px rgba(0, 242, 254, 0.05);
 }
 
 .history-item-title {
@@ -1267,22 +1312,23 @@ input {
 }
 
 .nura-avatar {
-    background: var(--bg-surface-strong);
-    border: 1px solid rgba(103, 229, 234, 0.15);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.08), rgba(177, 86, 255, 0.08));
+    border: 1px solid rgba(103, 229, 234, 0.2);
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.12), 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .avatar-logo {
     width: 22px;
     height: 22px;
     object-fit: contain;
+    filter: drop-shadow(0 0 4px rgba(0, 242, 254, 0.3));
 }
 
 .user-avatar {
     color: var(--text-primary);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background: linear-gradient(135deg, rgba(177, 86, 255, 0.1) 0%, rgba(248, 112, 154, 0.06) 100%);
+    border: 1px solid rgba(177, 86, 255, 0.15);
+    box-shadow: 0 0 10px rgba(177, 86, 255, 0.08), 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .bot-msg {
@@ -1317,7 +1363,6 @@ input {
 .bot-msg .msg-content {
     background: var(--bg-surface-strong);
     border: 1px solid var(--border-color);
-    border-left: 2px solid var(--cyan);
     border-radius: 4px 16px 16px 16px;
 }
 
@@ -1366,15 +1411,18 @@ input {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 14px 10px 12px;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 14px 14px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
     box-shadow: none;
+    transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
 }
 
 .composer-box:focus-within {
-    border-bottom-color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(0, 242, 254, 0.25);
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.06), 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.03);
 }
 
 .attach-btn,
@@ -1393,15 +1441,25 @@ input {
 
 .attach-btn {
     border-color: rgba(255, 255, 255, 0.06);
+    transition: all 0.25s;
 }
 
 .send-btn {
     border-color: rgba(255, 255, 255, 0.12);
+    transition: all 0.25s;
 }
 
 .attach-btn:hover {
-    color: #ffffff;
+    color: var(--cyan);
     border-color: rgba(0, 242, 254, 0.35);
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.15);
+}
+
+.send-btn:hover {
+    color: #fff;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    border-color: transparent;
+    box-shadow: 0 0 16px rgba(0, 242, 254, 0.3);
 }
 
 #user-input {
@@ -1415,15 +1473,16 @@ input {
     color: var(--text-primary);
     line-height: 1.75;
     padding: 11px 10px;
-    letter-spacing: 1.2px;
-    text-align: center;
+    letter-spacing: 0.3px;
+    text-align: left;
+    font-size: 0.95rem;
 }
 
 #user-input::placeholder {
-    color: rgba(255, 255, 255, 0.18);
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.22);
+    letter-spacing: 0.5px;
+    text-transform: none;
+    font-size: 0.9rem;
 }
 
 .send-btn {
@@ -1567,5 +1626,120 @@ input {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
+    }
+}
+
+/* Custom Modal Styles */
+.nura-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease-out forwards;
+}
+
+.nura-modal-overlay.active {
+    display: flex;
+}
+
+.nura-modal-box {
+    background: linear-gradient(145deg, var(--bg-surface), #0a0a0c);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.1), inset 0 0 20px rgba(112, 0, 255, 0.05);
+    border-radius: 16px;
+    padding: 32px;
+    width: 90%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: slideUpFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.nura-modal-title {
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.nura-modal-desc {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.nura-modal-input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.nura-modal-input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15);
+}
+
+.nura-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.nura-modal-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.nura-modal-btn.cancel {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nura-modal-btn.cancel:hover {
+    box-shadow: 0 0 25px rgba(235, 235, 235, 0.2);
+    transition: ease 0.2s;
+}
+
+.nura-modal-btn.confirm {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nura-modal-btn.confirm:hover {
+    box-shadow: 0 0 25px rgba(0, 255, 72, 0.2);
+    transition: ease 0.2s;
+}
+
+@keyframes slideUpFadeIn {
+    to {
+        transform: translateY(0);
+        opacity: 1;
     }
 }

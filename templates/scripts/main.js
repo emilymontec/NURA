@@ -174,7 +174,13 @@ async function loadSession(sessionId, force = false) {
 }
 
 async function renameSession(sessionId, currentTitle) {
-    const newTitle = prompt("Nuevo nombre para la sesión:", currentTitle);
+    const newTitle = await showCustomModal({
+        title: "Renombrar Chat",
+        description: "Introduce un nuevo nombre para esta conversación:",
+        isPrompt: true,
+        defaultValue: currentTitle
+    });
+    
     if (!newTitle || newTitle.trim() === "" || newTitle === currentTitle) return;
     
     try {
@@ -192,7 +198,13 @@ async function renameSession(sessionId, currentTitle) {
 }
 
 async function deleteSession(sessionId) {
-    if (!confirm("¿Estás seguro de que deseas eliminar esta sesión?")) return;
+    const confirmed = await showCustomModal({
+        title: "Eliminar Chat",
+        description: "¿Estás seguro de que deseas eliminar permanentemente esta conversación? Esta acción no se puede deshacer.",
+        isPrompt: false
+    });
+
+    if (!confirmed) return;
     
     try {
         const response = await fetch(`${API_BASE_URL}/sessions/${sessionId}/delete/`, {
@@ -716,6 +728,55 @@ function toggleAnalytics() {
     if (container) {
         container.classList.toggle("show-analytics");
     }
+}
+
+function showCustomModal({ title, description, isPrompt = false, defaultValue = "" }) {
+    return new Promise((resolve) => {
+        const overlay = document.getElementById("nura-modal-overlay");
+        if (!overlay) {
+            resolve(isPrompt ? prompt(description, defaultValue) : confirm(description));
+            return;
+        }
+
+        const titleEl = document.getElementById("nura-modal-title");
+        const descEl = document.getElementById("nura-modal-desc");
+        const inputEl = document.getElementById("nura-modal-input");
+        const cancelBtn = document.getElementById("nura-modal-cancel");
+        const confirmBtn = document.getElementById("nura-modal-confirm");
+
+        titleEl.textContent = title;
+        descEl.textContent = description;
+
+        if (isPrompt) {
+            inputEl.style.display = "block";
+            inputEl.value = defaultValue;
+        } else {
+            inputEl.style.display = "none";
+            inputEl.value = "";
+        }
+
+        const closeModal = (result) => {
+            overlay.classList.remove("active");
+            cancelBtn.onclick = null;
+            confirmBtn.onclick = null;
+            inputEl.onkeydown = null;
+            resolve(result);
+        };
+
+        cancelBtn.onclick = () => closeModal(isPrompt ? null : false);
+        confirmBtn.onclick = () => closeModal(isPrompt ? inputEl.value : true);
+        
+        inputEl.onkeydown = (e) => {
+            if (e.key === "Enter") confirmBtn.click();
+            if (e.key === "Escape") cancelBtn.click();
+        };
+
+        overlay.classList.add("active");
+        if (isPrompt) {
+            inputEl.focus();
+            inputEl.select();
+        }
+    });
 }
 
 window.testAPI = testAPI;
